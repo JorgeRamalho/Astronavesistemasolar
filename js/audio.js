@@ -88,3 +88,35 @@ const AudioEspaco = {
     return this.ativo;
   }
 };
+
+const NaracaoEspaco = {
+  _utterance: null,
+
+  narrar(texto, onFim) {
+    if (!('speechSynthesis' in window)) {
+      if (onFim) onFim();
+      return;
+    }
+    this.parar();
+    const utterance = new SpeechSynthesisUtterance(texto);
+    utterance.lang = 'pt-BR';
+    utterance.rate = 0.92;
+    utterance.pitch = 1.05;
+    const vozes = speechSynthesis.getVoices().filter(v => v.lang.startsWith('pt'));
+    if (vozes.length) utterance.voice = vozes[0];
+    utterance.onend = () => { if (onFim) onFim(); };
+    utterance.onerror = () => { if (onFim) onFim(); };
+    this._utterance = utterance;
+    speechSynthesis.speak(utterance);
+  },
+
+  parar() {
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+    this._utterance = null;
+  }
+};
+
+if ('speechSynthesis' in window) {
+  speechSynthesis.getVoices();
+  speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+}

@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     init() {
       Jogos.init();
+      RedeTeste.init();
       this.carregarProgresso();
       this.criarTelaInicial();
       this.initControlesAudio();
@@ -69,9 +70,92 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 800);
     },
 
+    temSaveJornada() {
+      try {
+        return !!localStorage.getItem('viagemSolar');
+      } catch {
+        return false;
+      }
+    },
+
+    temJornadaEmAndamento() {
+      return this.temSaveJornada() && this.jornadaIndice < this.jornadaOrdem.length;
+    },
+
+    obterResumoProgresso() {
+      const total = this.jornadaOrdem.length;
+      const concluidas = this.jornadaCompletos.length;
+      const idAtual = this.jornadaOrdem[this.jornadaIndice];
+      const planetaAtual = planetas.find(p => p.id === idAtual);
+      const pct = Math.round((concluidas / total) * 100);
+
+      let situacao;
+      if (concluidas === 0) {
+        situacao = `Viagem em andamento — parada atual: ${planetaAtual?.nome || 'Terra'} (1ª fase)`;
+      } else if (this.jornadaIndice >= total) {
+        situacao = 'Viagem completa — todo o Sistema Solar explorado';
+      } else {
+        situacao = `${concluidas} de ${total} paradas concluídas — parada atual: ${planetaAtual?.nome || '—'}`;
+      }
+
+      return { concluidas, total, pct, planetaAtual: planetaAtual?.nome || 'Terra', situacao };
+    },
+
+    mostrarConfirmacaoSobrescrita(onConfirm) {
+      const resumo = this.obterResumoProgresso();
+      const existente = document.getElementById('modal-sobrescrever');
+      if (existente) existente.remove();
+
+      const modal = document.createElement('div');
+      modal.id = 'modal-sobrescrever';
+      modal.className = 'modal-sobrescrever';
+      modal.innerHTML = `
+        <div class="modal-sobrescrever-fundo" id="modal-sobrescrever-fundo"></div>
+        <div class="modal-sobrescrever-caixa" role="alertdialog" aria-labelledby="modal-sobrescrever-titulo">
+          <div class="modal-sobrescrever-icone">⚠️</div>
+          <h2 id="modal-sobrescrever-titulo">Sobrescrever save da viagem?</h2>
+          <p class="modal-sobrescrever-destaque">
+            Tem certeza? O progresso salvo será <strong>apagado permanentemente</strong> e não poderá ser recuperado.
+          </p>
+          <div class="modal-sobrescrever-progresso">
+            <div class="modal-sobrescrever-progresso-barra">
+              <div class="modal-sobrescrever-progresso-preenchimento" style="width:${resumo.pct}%"></div>
+            </div>
+            <p class="modal-sobrescrever-situacao">${resumo.situacao}</p>
+          </div>
+          <p class="modal-sobrescrever-nota">Isso vale para qualquer progresso — inclusive se você ainda estiver na Terra.</p>
+          <div class="modal-sobrescrever-botoes">
+            <button type="button" class="btn-modal-cancelar" id="modal-sobrescrever-cancelar">Cancelar</button>
+            <button type="button" class="btn-modal-confirmar" id="modal-sobrescrever-confirmar">Sim, apagar e recomeçar</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      const fechar = () => modal.remove();
+      document.getElementById('modal-sobrescrever-fundo')?.addEventListener('click', fechar);
+      document.getElementById('modal-sobrescrever-cancelar')?.addEventListener('click', fechar);
+      document.getElementById('modal-sobrescrever-confirmar')?.addEventListener('click', () => {
+        fechar();
+        onConfirm();
+      });
+    },
+
+    iniciarNovaJornadaConfirmada() {
+      this.novaJornada();
+      this.modoAtual = 'aventura';
+      this.transicao(() => this.criarRotaAventura());
+    },
+
+    novaJornada() {
+      this.jornadaIndice = 0;
+      this.jornadaCompletos = [];
+      this.salvarProgresso();
+    },
+
     criarTelaInicial() {
       const main = document.getElementById('main-container');
-      const temProgresso = this.jornadaCompletos.length > 0;
+      const temProgresso = this.temJornadaEmAndamento();
       main.innerHTML = `
         <div class="tela-inicial">
           <div class="sol-decorativo">${planetaArte('sol', 160)}</div>
@@ -85,15 +169,15 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="modo-card" data-modo="aventura">
               <div class="modo-card-icon">👨‍🚀</div>
               <div class="modo-card-content">
-                <h3>Comandante: Capitão Cosmos</h3>
-                <p>Modo Aventura - Siga a rota completa!</p>
+                <h3>Viagem Espacial</h3>
+                <p>Inicie uma nova viagem pelo Sistema Solar!</p>
                 <span class="modo-card-info">${this.jornadaOrdem.length} paradas</span>
               </div>
             </div>
             <div class="modo-card" data-modo="exploracao">
               <div class="modo-card-icon">🚀</div>
               <div class="modo-card-content">
-                <h3>Foguete: Explorador Estelar</h3>
+                <h3>Sistema Solar</h3>
                 <p>Modo Exploração - Visite livremente!</p>
                 <span class="modo-card-info">Sem regras</span>
               </div>
@@ -101,12 +185,23 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="modo-card" data-modo="galeria">
               <div class="modo-card-icon">📡</div>
               <div class="modo-card-content">
-                <h3>Missão: Explorar o Sistema Solar</h3>
+                <h3>Conheça os Planetas</h3>
                 <p>Modo Galeria - Navegue pelas fichas técnicas!</p>
                 <span class="modo-card-info">${planetas.length} planetas</span>
               </div>
             </div>
+            <div class="modo-card modo-card-rede" data-modo="rede">
+              <div class="modo-card-icon">🌐</div>
+              <div class="modo-card-content">
+                <h3>Compartilhar Jogo</h3>
+                <p>Link online e QR Code — acesse de qualquer lugar</p>
+                <span class="modo-card-info">Site + rede local</span>
+              </div>
+            </div>
           </div>
+          <a class="link-site-online" href="${RedeTeste.obterLinkOnline()}" target="_blank" rel="noopener">
+            🌐 Jogar online: jorgeramalho.github.io/Astronavesistemasolar
+          </a>
           ${temProgresso ? '<button class="btn-continuar" id="btn-continuar">▶ CONTINUAR JORNADA</button>' : ''}
           <div class="estrelas-bg"></div>
         </div>
@@ -119,11 +214,13 @@ document.addEventListener('DOMContentLoaded', () => {
           const modo = card.dataset.modo;
           this.modoAtual = modo;
           if (modo === 'aventura') {
-            this.transicao(() => this.criarRotaAventura());
+            this.transicao(() => this.criarTelaNovaJornada());
           } else if (modo === 'exploracao') {
             this.transicao(() => this.criarModoExploracao());
           } else if (modo === 'galeria') {
             this.transicao(() => this.criarModoGaleria());
+          } else if (modo === 'rede') {
+            this.transicao(() => this.criarTelaTesteRede());
           }
         });
       });
@@ -135,21 +232,75 @@ document.addEventListener('DOMContentLoaded', () => {
           this.transicao(() => this.criarRotaAventura());
         });
       }
+    },
 
+    criarTelaNovaJornada() {
+      const main = document.getElementById('main-container');
+      const temSave = this.temSaveJornada();
+      const resumo = this.obterResumoProgresso();
+      const paradas = this.jornadaOrdem.map(id => planetas.find(p => p.id === id)).filter(Boolean);
+
+      main.innerHTML = `
+        <div class="nova-jornada">
+          <div class="voltar-bar">
+            <button class="btn-voltar" id="nova-jornada-voltar">Voltar ao Menu</button>
+          </div>
+          <div class="nova-jornada-header">
+            <h2>🚀 Nova Viagem Espacial</h2>
+            <p>Embarque numa jornada completa pelo Sistema Solar</p>
+          </div>
+          ${temSave ? `
+            <div class="nova-jornada-alerta" role="alert">
+              <strong>⚠️ Atenção — save existente detectado</strong>
+              <p>Você já possui uma viagem salva. Ao iniciar uma nova viagem, <strong>todo o progresso atual será sobrescrito</strong>, mesmo que esteja na primeira fase (Terra) ou perto de concluir o jogo.</p>
+              <div class="nova-jornada-alerta-resumo">
+                <span class="nova-jornada-alerta-barra" style="width:${resumo.pct}%"></span>
+                <span>${resumo.situacao}</span>
+              </div>
+            </div>
+          ` : ''}
+          <div class="nova-jornada-info">
+            <p>Visite <strong>${this.jornadaOrdem.length} paradas</strong>, complete os desafios de cada corpo celeste e chegue ao Sol! Cada fase concluída fica indisponível — avance sempre para a próxima.</p>
+          </div>
+          <div class="nova-jornada-rota">
+            ${paradas.map((p, idx) => `
+              <span class="nova-jornada-parada" style="color:${p.cor}">${idx + 1}. ${p.nome}</span>
+            `).join('')}
+          </div>
+          <button class="btn-iniciar${temSave ? ' btn-iniciar-alerta' : ''}" id="btn-iniciar-jornada">
+            ${temSave ? '⚠️ Iniciar Nova Viagem (sobrescrever save)' : 'Iniciar Nova Viagem'}
+          </button>
+        </div>
+        <div class="estrelas-bg"></div>
+      `;
+
+      this.criarEstrelas();
+
+      document.getElementById('nova-jornada-voltar').addEventListener('click', () => {
+        this.transicao(() => this.criarTelaInicial());
+      });
+
+      document.getElementById('btn-iniciar-jornada').addEventListener('click', () => {
+        if (this.temSaveJornada()) {
+          this.mostrarConfirmacaoSobrescrita(() => this.iniciarNovaJornadaConfirmada());
+        } else {
+          this.iniciarNovaJornadaConfirmada();
+        }
+      });
     },
 
     criarRotaAventura() {
       const main = document.getElementById('main-container');
       const destinoIdx = this.jornadaIndice;
-      const destino = this.jornadaOrdem[destinoIdx];
-      const planeta = planetas.find(p => p.id === destino);
 
       main.innerHTML = `
         <div class="rota-aventura">
+          <div class="voltar-bar">
+            <button class="btn-voltar" id="rota-voltar-menu">Voltar ao Menu</button>
+          </div>
           <div class="rota-header">
             <h2>🚀 ROTA DA AVENTURA</h2>
             <p>Sua jornada pelo Sistema Solar</p>
-            <button class="btn-voltar-pequeno" id="rota-voltar-menu">Menu</button>
           </div>
           <div class="rota-progresso">
             <span>Parada ${destinoIdx + 1} de ${this.jornadaOrdem.length}</span>
@@ -158,9 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </div>
           <div class="rota-lista" id="rota-lista"></div>
-          <button class="btn-avancar" id="rota-continuar">
-            🚀 IR PARA ${planeta.nome.toUpperCase()}
-          </button>
+          <p class="rota-dica">Apenas a fase atual está disponível — clique no planeta destacado</p>
         </div>
         <div class="estrelas-bg"></div>
       `;
@@ -168,14 +317,156 @@ document.addEventListener('DOMContentLoaded', () => {
       this.criarEstrelas();
       this.criarListaRota();
 
-      document.getElementById('rota-continuar').addEventListener('click', () => {
-        this.visitarPlaneta(destino);
-      });
-
       document.getElementById('rota-voltar-menu').addEventListener('click', () => {
         this.transicao(() => this.criarTelaInicial());
       });
 
+    },
+
+    criarTelaTesteRede() {
+      RedeTeste.pararPoll();
+      const main = document.getElementById('main-container');
+      const info = RedeTeste.obterInfoViewport();
+      const emArquivo = RedeTeste.estaEmArquivoLocal();
+      const linkOnline = RedeTeste.obterLinkOnline();
+
+      main.innerHTML = `
+        <div class="tela-teste-rede">
+          <div class="voltar-bar">
+            <button class="btn-voltar" id="rede-voltar">Voltar ao Menu</button>
+          </div>
+          <div class="rede-header">
+            <span class="rede-header-icon">🌐</span>
+            <h2>Compartilhar Jogo</h2>
+            <p>Acesse de qualquer lugar ou teste na rede local</p>
+          </div>
+
+          <div class="rede-link-box rede-link-box-online">
+            <div class="rede-badge-online">SITE ONLINE</div>
+            <label class="rede-label">Link público — funciona em qualquer rede</label>
+            <div class="rede-link-linha">
+              <input type="text" class="rede-link-input rede-link-input-online" id="rede-link-online" readonly value="${linkOnline}">
+              <button type="button" class="btn-rede-copiar btn-rede-copiar-online" id="btn-copiar-online">Copiar</button>
+            </div>
+            <a class="btn-abrir-online" href="${linkOnline}" target="_blank" rel="noopener">Abrir site online ↗</a>
+            <div class="rede-qr-wrap">
+              <div class="rede-qr-placeholder" id="rede-qr-online"></div>
+            </div>
+            <p class="rede-link-dica" id="rede-status-online">Escaneie o QR Code ou envie o link para qualquer pessoa.</p>
+          </div>
+
+          <details class="rede-local-detalhes"${emArquivo ? ' open' : ''}>
+            <summary>Teste na rede local (Wi‑Fi)</summary>
+            ${emArquivo ? `
+              <div class="rede-alerta rede-alerta-aviso">
+                <strong>Servidor local</strong>
+                <p>Execute <code>start-teste.bat</code> para gerar link na mesma Wi‑Fi.</p>
+              </div>
+            ` : ''}
+            <div class="rede-link-box" id="rede-link-box">
+              <label class="rede-label">Link na mesma Wi‑Fi</label>
+              <div class="rede-link-linha">
+                <input type="text" class="rede-link-input" id="rede-link-input" readonly placeholder="Aguardando servidor…">
+                <button type="button" class="btn-rede-copiar" id="btn-rede-copiar">Copiar</button>
+              </div>
+              <p class="rede-link-dica" id="rede-link-status">Detectando link na rede…</p>
+              <div class="rede-qr-wrap">
+                <div class="rede-qr-placeholder" id="rede-qr-placeholder">
+                  <span class="rede-qr-loading">⏳ Gerando QR Code…</span>
+                </div>
+              </div>
+              <div class="rede-links-extra" id="rede-links-extra"></div>
+            </div>
+          </details>
+
+          <div class="rede-viewport-box">
+            <h3>Este dispositivo agora</h3>
+            <div class="rede-viewport-grid">
+              <div class="rede-stat"><span>Breakpoint</span><strong style="color:${info.corBreakpoint}">${info.breakpoint}</strong></div>
+              <div class="rede-stat"><span>Resolução</span><strong>${info.largura} × ${info.altura}px</strong></div>
+              <div class="rede-stat"><span>Orientação</span><strong>${info.orientacao}</strong></div>
+              <div class="rede-stat"><span>DPR</span><strong>${info.dpr}</strong></div>
+            </div>
+            <button type="button" class="btn-rede-overlay" id="btn-rede-overlay">
+              ${RedeTeste.overlayAtivo ? 'Desativar' : 'Ativar'} overlay responsivo
+            </button>
+          </div>
+        </div>
+        <div class="estrelas-bg"></div>
+      `;
+
+      this.criarEstrelas();
+
+      const qrOnline = document.getElementById('rede-qr-online');
+      if (qrOnline) RedeTeste.renderizarQrCode(qrOnline, linkOnline);
+
+      document.getElementById('rede-voltar').addEventListener('click', () => {
+        RedeTeste.pararPoll();
+        this.transicao(() => this.criarTelaInicial());
+      });
+
+      document.getElementById('btn-rede-overlay')?.addEventListener('click', () => {
+        RedeTeste.alternarOverlay();
+        const btn = document.getElementById('btn-rede-overlay');
+        if (btn) btn.textContent = `${RedeTeste.overlayAtivo ? 'Desativar' : 'Ativar'} overlay responsivo`;
+      });
+
+      document.getElementById('btn-copiar-online')?.addEventListener('click', async () => {
+        const ok = await RedeTeste.copiarTexto(linkOnline);
+        const st = document.getElementById('rede-status-online');
+        if (st) st.textContent = ok ? '✅ Link online copiado!' : 'Copie manualmente o link acima.';
+      });
+
+      document.getElementById('btn-rede-copiar')?.addEventListener('click', () => this.copiarLinkRede());
+
+      this.carregarLinkRede();
+      if (!document.getElementById('rede-link-input')?.value) {
+        RedeTeste._pollTimer = setInterval(() => this.carregarLinkRede(), 2500);
+      }
+    },
+
+    async copiarLinkRede() {
+      const input = document.getElementById('rede-link-input');
+      const status = document.getElementById('rede-link-status');
+      if (!input?.value) return;
+      const ok = await RedeTeste.copiarTexto(input.value);
+      if (status) {
+        status.textContent = ok ? '✅ Link copiado! Cole no navegador do celular.' : 'Copie manualmente o link acima.';
+        status.style.color = ok ? '#6fcf6f' : '#ff8888';
+      }
+    },
+
+    async carregarLinkRede() {
+      const input = document.getElementById('rede-link-input');
+      const status = document.getElementById('rede-link-status');
+      const qrBox = document.getElementById('rede-qr-placeholder');
+      const extra = document.getElementById('rede-links-extra');
+      if (!input) return;
+
+      const resultado = await RedeTeste.gerarLinksCompartilhaveis();
+
+      if (resultado.primary) {
+        input.value = resultado.primary;
+        if (qrBox) {
+          const ok = RedeTeste.renderizarQrCode(qrBox, resultado.primary);
+          if (!ok) qrBox.innerHTML = '<span class="rede-qr-erro">QR indisponível</span>';
+        }
+        if (status) {
+          status.textContent = '📱 Escaneie o QR Code ou toque em Copiar e abra no celular.';
+          status.style.color = '#8899bb';
+        }
+        if (extra && resultado.links.length > 1) {
+          extra.innerHTML = `
+            <p class="rede-label" style="margin-top:16px">Outros endereços:</p>
+            ${resultado.links.filter(u => u !== resultado.primary).map(u =>
+              `<a class="rede-link-alt" href="${u}" target="_blank" rel="noopener">${u}</a>`
+            ).join('')}
+          `;
+        }
+        RedeTeste.pararPoll();
+      } else if (status && !input.value) {
+        status.textContent = '⏳ Execute start-teste.bat e aguarde…';
+      }
     },
 
     criarListaRota() {
@@ -184,14 +475,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
       lista.innerHTML = this.jornadaOrdem.map((id, idx) => {
         const p = planetas.find(pl => pl.id === id);
-        const completa = this.jornadaCompletos.includes(id);
+        const passou = idx < this.jornadaIndice;
         const atual = idx === this.jornadaIndice;
         const bloqueada = idx > this.jornadaIndice;
 
         let classe = 'rota-item';
         let icone, statusTexto;
-        if (completa) {
-          classe += ' completa';
+        if (passou) {
+          classe += ' completa indisponivel';
           icone = '✅';
           statusTexto = 'Completo';
         } else if (atual) {
@@ -205,7 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         return `
-          <div class="${classe}">
+          <div class="${classe}${this.podeVisitar(id) ? ' clicavel' : ''}" data-planeta="${id}">
             <span class="rota-icone">${icone}</span>
             ${planetaArte(p.id, 32)}
             <span class="rota-nome" style="color:${p.cor}">${p.nome}</span>
@@ -213,17 +504,26 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         `;
       }).join('');
+
+      lista.querySelectorAll('.rota-item.clicavel').forEach(el => {
+        el.addEventListener('click', () => {
+          const id = el.dataset.planeta;
+          if (id && this.podeVisitar(id)) this.visitarPlaneta(id);
+        });
+      });
     },
 
     criarModoExploracao() {
       const main = document.getElementById('main-container');
 
       main.innerHTML = `
+        <div class="voltar-bar voltar-bar--fixo">
+          <button class="btn-voltar" id="explorar-voltar">Voltar ao Menu</button>
+        </div>
         <div class="mapa-sistema" id="mapa-sistema">
           <div class="mapa-header">
             <h2>🚀 MODO EXPLORAÇÃO</h2>
             <p>Passe o mouse nos planetas para ampliar e clique para ver a ficha técnica!</p>
-            <button class="btn-voltar-pequeno" id="explorar-voltar">Menu</button>
           </div>
           <div class="exploracao-wrapper" id="exploracao-wrapper">
             <div class="orbita-container" id="orbita-container"></div>
@@ -275,6 +575,24 @@ document.addEventListener('DOMContentLoaded', () => {
         jupiter: 300, saturno: 140, urano: 220, netuno: 10, plutao: 340
       };
 
+      const tamanhosSol = isMobile ? 50 : 70;
+
+      const solWrapper = document.createElement('div');
+      solWrapper.className = 'planeta-wrapper';
+      solWrapper.style.cssText = `position:absolute;top:50%;left:50%;width:0;height:0;transform:translate(-50%,-50%);z-index:10;`;
+
+      const solEl = document.createElement('div');
+      solEl.className = 'corpo-celeste planeta sol planeta-link';
+      solEl.dataset.planeta = 'sol';
+      solEl.style.cssText = `position:absolute;top:50%;left:50%;width:${tamanhosSol}px;height:${tamanhosSol}px;cursor:pointer;`;
+      solEl.innerHTML = `${planetaArte('sol', tamanhosSol)}<span class="corpo-nome">Sol</span>`;
+      solEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.mostrarPainelExploracao('sol');
+      });
+      solWrapper.appendChild(solEl);
+      container.appendChild(solWrapper);
+
       ordemMapa.forEach(id => {
         const p = planetas.find(pl => pl.id === id);
         if (!p) return;
@@ -286,6 +604,11 @@ document.addEventListener('DOMContentLoaded', () => {
         orbita.style.animationDuration = `${orb.duracao}s`;
         orbita.style.top = `calc(50% - ${orb.raio}px)`;
         orbita.style.left = `calc(50% - ${orb.raio}px)`;
+
+        const rad = (angulosIniciais[id] * Math.PI) / 180;
+        const planetaWrapper = document.createElement('div');
+        planetaWrapper.className = 'planeta-wrapper';
+        planetaWrapper.style.cssText = `position:absolute;top:50%;left:50%;width:0;height:0;transform:translate(${Math.cos(rad) * orb.raio}px,${Math.sin(rad) * orb.raio}px);`;
 
         const planetaEl = document.createElement('div');
         planetaEl.className = 'corpo-celeste planeta planeta-link';
@@ -299,9 +622,6 @@ document.addEventListener('DOMContentLoaded', () => {
         html += `<span class="corpo-nome">${p.nome}</span>`;
         planetaEl.innerHTML = html;
 
-        const rad = (angulosIniciais[id] * Math.PI) / 180;
-        planetaEl.style.transform = `translate(-50%,-50%) translate(${Math.cos(rad) * orb.raio}px,${Math.sin(rad) * orb.raio}px)`;
-
         planetaEl.addEventListener('click', (e) => {
           e.stopPropagation();
           if (e.target.closest('[data-planeta="lua"]')) {
@@ -310,7 +630,8 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           this.mostrarPainelExploracao(id);
         });
-        orbita.appendChild(planetaEl);
+        planetaWrapper.appendChild(planetaEl);
+        orbita.appendChild(planetaWrapper);
         container.appendChild(orbita);
       });
     },
@@ -331,7 +652,7 @@ document.addEventListener('DOMContentLoaded', () => {
       painel.innerHTML = `
         <div class="exploracao-painel-overlay" id="exploracao-painel-fechar"></div>
         <div class="exploracao-painel-conteudo" style="border-color: ${p.cor}">
-          <button class="exploracao-painel-fechar" id="exploracao-painel-fechar-btn">✕</button>
+          <button class="btn-voltar btn-voltar--icone" id="exploracao-painel-fechar-btn" aria-label="Fechar">✕</button>
           <div class="exploracao-painel-topo" style="background: radial-gradient(circle at center, ${p.cor}22 0%, transparent 70%)">
             ${planetaArte(p.id, 80)}
             <h2 style="color:${p.cor}">${p.nome}</h2>
@@ -392,10 +713,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
       main.innerHTML = `
         <div class="galeria-modo" id="galeria-modo">
+          <div class="voltar-bar">
+            <button class="btn-voltar" id="galeria-voltar">Voltar ao Menu</button>
+          </div>
           <div class="galeria-header">
             <h2>📡 GALERIA DO SISTEMA SOLAR</h2>
             <p>Navegue pelas fichas técnicas de todos os corpos celestes</p>
-            <button class="btn-voltar-pequeno" id="galeria-voltar">Menu</button>
           </div>
           <div class="galeria-grade" id="galeria-grade"></div>
           <div class="galeria-painel" id="galeria-painel"></div>
@@ -406,8 +729,8 @@ document.addEventListener('DOMContentLoaded', () => {
       this.criarEstrelas();
       const grade = document.getElementById('galeria-grade');
 
-      const ordemGaleria = ['sol','mercurio','venus','terra','lua','marte','jupiter','saturno','urano','netuno','plutao','halley','halebopp'];
-      const tamanhos = { sol: 72, mercurio: 26, venus: 32, terra: 32, lua: 24, marte: 26, jupiter: 44, saturno: 38, urano: 32, netuno: 32, plutao: 24, halley: 28, halebopp: 30 };
+      const ordemGaleria = ['sol','mercurio','venus','terra','lua','marte','jupiter','saturno','urano','netuno','plutao'];
+      const tamanhos = { sol: 72, mercurio: 26, venus: 32, terra: 32, lua: 24, marte: 26, jupiter: 44, saturno: 38, urano: 32, netuno: 32, plutao: 24 };
 
       ordemGaleria.forEach(id => {
         const p = planetas.find(pl => pl.id === id);
@@ -454,7 +777,7 @@ document.addEventListener('DOMContentLoaded', () => {
       painel.innerHTML = `
         <div class="painel-overlay" id="painel-fechar"></div>
         <div class="painel-conteudo">
-          <button class="painel-fechar" id="painel-fechar-btn">✕</button>
+          <button class="btn-voltar btn-voltar--icone" id="painel-fechar-btn" aria-label="Fechar">✕</button>
           <div class="painel-topo" style="background: radial-gradient(circle at center, ${p.cor}22 0%, transparent 70%)">
             ${planetaArte(p.id, tam + 20)}
             <h2 style="color:${p.cor}">${p.nome}</h2>
@@ -505,12 +828,13 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     podeVisitar(id) {
-      if (this.jornadaCompletos.includes(id)) return true;
+      if (this.jornadaIndice >= this.jornadaOrdem.length) return false;
       return id === this.jornadaOrdem[this.jornadaIndice];
     },
 
     visitarPlaneta(id) {
       if (this.estaViajando) return;
+      if (this.modoAtual === 'aventura' && !this.podeVisitar(id)) return;
       const planeta = planetas.find(p => p.id === id);
       if (!planeta) return;
 
@@ -531,9 +855,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const jaCompleto = this.jornadaCompletos.includes(planeta.id);
 
       main.innerHTML = `
-        <div class="planeta-visao" id="planeta-visao">
-          <div class="planeta-header">
-            <button class="btn-voltar" id="btn-voltar-mapa">Voltar</button>
+        <div class="planeta-visao ${planeta.id === 'lua' ? 'lua-ambiente' : ''}" id="planeta-visao">
+          <div class="voltar-bar">
+            <button class="btn-voltar" id="btn-voltar-mapa">Voltar ao Mapa</button>
           </div>
 
           <div class="aventura-indicador">
@@ -602,7 +926,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const area = document.getElementById('desafio-area');
 
             if (jaCompleto) {
-              area.innerHTML = `<div class="desafio-completo">✅ Você já completou este desafio! Volte à rota.</div>`;
+              area.innerHTML = `<div class="desafio-completo">✅ Fase concluída! Esta parada não está mais disponível. Siga para a próxima.</div>`;
               return;
             }
 
@@ -614,17 +938,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (this.jornadaIndice >= this.jornadaOrdem.length) {
                   setTimeout(() => {
-                    area.innerHTML = `<div class="desafio-completo" style="font-size:22px">🎉 VIAGEM COMPLETA!<br>Você explorou todo o Sistema Solar!</div>`;
-                  }, 2000);
+                    const btn = document.querySelector('.btn-continuar-jogo');
+                    if (btn) {
+                      btn.addEventListener('click', () => {
+                        setTimeout(() => this.transicao(() => this.mostrarApresentacaoFinal()), 400);
+                      }, { once: true });
+                    } else {
+                      this.transicao(() => this.mostrarApresentacaoFinal());
+                    }
+                  }, 100);
                 } else {
                   const prox = planetas.find(p => p.id === this.jornadaOrdem[this.jornadaIndice]);
                   setTimeout(() => {
-                    const btnProx = document.createElement('button');
-                    btnProx.className = 'btn-avancar';
-                    btnProx.style.marginTop = '15px';
-                    btnProx.textContent = `🚀 IR PARA ${prox.nome}`;
-                    area.appendChild(btnProx);
-                    btnProx.addEventListener('click', () => {
+                    area.innerHTML = `
+                      <div class="desafio-completo">
+                        ✅ Missão cumprida!<br>
+                        Próxima parada: <strong style="color:${prox.cor}">${prox.nome}</strong>
+                        <button class="btn-avancar" id="btn-seguir-proximo">🚀 Seguir para ${prox.nome}</button>
+                      </div>
+                    `;
+                    document.getElementById('btn-seguir-proximo').addEventListener('click', () => {
+                      Jogos.pararJogo();
+                      Jogos.setCallback(null);
                       this.visitarPlaneta(prox.id);
                     });
                   }, 1000);
@@ -642,8 +977,117 @@ document.addEventListener('DOMContentLoaded', () => {
         Jogos.setCallback(null);
         this.transicao(() => this.criarRotaAventura());
       });
+    },
+
+    mostrarApresentacaoFinal() {
+      Jogos.pararJogo();
+      Jogos.setCallback(null);
+      NaracaoEspaco.parar();
+      if (this._recapTimer) clearInterval(this._recapTimer);
+
+      const paradas = this.jornadaOrdem
+        .map(id => planetas.find(p => p.id === id))
+        .filter(Boolean);
+      const main = document.getElementById('main-container');
+      const slidesHtml = paradas.map((p, idx) => `
+        <div class="recap-slide${idx === 0 ? ' ativo' : ''}" data-idx="${idx}" style="--cor-planeta:${p.cor}">
+          <div class="recap-slide-num">Parada ${idx + 1} de ${paradas.length}</div>
+          <div class="recap-slide-arte">${planetaArte(p.id, 120)}</div>
+          <h2 class="recap-slide-nome" style="color:${p.cor}">${p.nome}</h2>
+          <p class="recap-slide-desafio">✅ ${p.desafio?.nome || 'Missão concluída'}</p>
+          <p class="recap-slide-curio">${p.curiosidades?.[0] || ''}</p>
+        </div>
+      `).join('');
+
+      main.innerHTML = `
+        <div class="apresentacao-final">
+          <div class="estrelas-bg"></div>
+          <div class="recap-cabecalho">
+            <span class="recap-emoji">🚀</span>
+            <h1>Sua Jornada pelo Sistema Solar</h1>
+            <p>Reviva cada parada da sua viagem espacial</p>
+          </div>
+          <div class="recap-slideshow" id="recap-slideshow">
+            ${slidesHtml}
+          </div>
+          <div class="recap-barra">
+            <div class="recap-barra-preenchimento" id="recap-barra"></div>
+          </div>
+          <div class="recap-finale oculto" id="recap-finale">
+            <div class="recap-finale-brilho"></div>
+            <div class="recap-finale-sol">${planetaArte('sol', 140)}</div>
+            <h2 class="recap-finale-titulo">🎉 Viagem Completa!</h2>
+            <p class="recap-narracao" id="recap-narracao">
+              Uau, um astronauta assim como você vai longe para novas viagens.
+              Você quer conhecer outras galáxias, outros sistemas planetários e novas estrelas.
+            </p>
+            <button class="btn-interstellar" id="btn-viagem-interstellar">Viagem Interstellar</button>
+          </div>
+        </div>
+      `;
+
+      this.criarEstrelas();
+      this.iniciarSlideshowRecap(paradas.length);
+
+      document.getElementById('btn-viagem-interstellar')?.addEventListener('click', () => {
+        NaracaoEspaco.parar();
+        if (this._recapTimer) clearInterval(this._recapTimer);
+        this.transicao(() => this.mostrarTelaInterstellar());
+      });
+    },
+
+    iniciarSlideshowRecap(total) {
+      let atual = 0;
+      const slides = document.querySelectorAll('.recap-slide');
+      const barra = document.getElementById('recap-barra');
+      const slideshow = document.getElementById('recap-slideshow');
+      const finale = document.getElementById('recap-finale');
+      const duracaoSlide = 3200;
+
+      const avancar = () => {
+        slides[atual]?.classList.remove('ativo');
+        atual++;
+        if (atual < total) {
+          slides[atual]?.classList.add('ativo');
+          if (barra) barra.style.width = `${((atual + 1) / total) * 100}%`;
+        } else {
+          clearInterval(this._recapTimer);
+          slideshow?.classList.add('oculto');
+          document.querySelector('.recap-cabecalho')?.classList.add('oculto');
+          document.querySelector('.recap-barra')?.classList.add('oculto');
+          finale?.classList.remove('oculto');
+          const texto = document.getElementById('recap-narracao')?.textContent?.trim();
+          if (texto) NaracaoEspaco.narrar(texto);
+        }
+      };
+
+      if (barra) barra.style.width = `${(1 / total) * 100}%`;
+      this._recapTimer = setInterval(avancar, duracaoSlide);
+    },
+
+    mostrarTelaInterstellar() {
+      NaracaoEspaco.parar();
+      const main = document.getElementById('main-container');
+      main.innerHTML = `
+        <div class="tela-interstellar">
+          <div class="estrelas-bg"></div>
+          <div class="interstellar-galaxia"></div>
+          <div class="interstellar-conteudo">
+            <div class="interstellar-nave">🚀</div>
+            <h1>Viagem Interstellar</h1>
+            <p class="interstellar-sub">Além do Sistema Solar aguardam galáxias, exoplanetas e estrelas distantes.</p>
+            <p class="interstellar-em-breve">🌌 Em breve — novas fronteiras do universo!</p>
+            <button class="btn-voltar" id="btn-interstellar-voltar">Voltar ao Menu</button>
+          </div>
+        </div>
+      `;
+      this.criarEstrelas();
+      document.getElementById('btn-interstellar-voltar').addEventListener('click', () => {
+        this.transicao(() => this.criarTelaInicial());
+      });
     }
   };
 
+  window.App = App;
   App.init();
 });

@@ -66,7 +66,7 @@ const planetas = [
     ],
     desafio: {
       nome: 'Corrida de Mercúrio',
-      descricao: 'Mercúrio é o mais rápido! Desvie dos obstáculos em alta velocidade. Use ↑↓ para trocar de faixa.',
+      descricao: 'Mercúrio é o mais rápido! Desvie dos obstáculos em alta velocidade. Use ← → para trocar de faixa.',
       tipo: 'mercuryDash',
       duracao: 25
     }
@@ -122,9 +122,9 @@ const planetas = [
     ],
     desafio: {
       nome: 'Desvio de Meteoros',
-      descricao: 'Desvie dos meteoros e cometas por 1 minuto! Use as setas ← → para mover a nave.',
+      descricao: 'Desvie dos meteoros e cometas por 30 segundos! Use as setas ← → para mover a nave.',
       tipo: 'desvioMeteoros',
-      duracao: 60
+      duracao: 30
     }
   },
   {
@@ -150,10 +150,10 @@ const planetas = [
     ],
     desafio: {
       nome: 'Pouso Lunar',
-      descricao: 'Pouse a nave na Lua! Use as setas ← → para controlar e ↓ para descer mais rápido.',
+      descricao: 'Freie com ↑ e alinhe a nave na área verde. Velocidade vertical abaixo de 4 para pousar com sucesso!',
       tipo: 'pousoLunar',
-      gravidade: 0.3,
-      combustivel: 100
+      gravidade: 0.08,
+      combustivel: 120
     }
   },
   {
@@ -179,9 +179,9 @@ const planetas = [
     ],
     desafio: {
       nome: 'Caça aos Meteoros',
-      descricao: 'Clique nos meteoros para coletá-los antes que caiam em Marte! Você tem 20 segundos.',
+      descricao: 'Dispare nos meteoros ☄️ antes que caiam em Marte! Só contam os alvos abatidos. Você tem 30 segundos.',
       tipo: 'cliqueMeteoros',
-      duracao: 20,
+      duracao: 30,
       totalMeteoros: 15
     }
   },
@@ -208,7 +208,7 @@ const planetas = [
     ],
     desafio: {
       nome: 'Tempestade em Júpiter',
-      descricao: 'Desvie sua nave das tempestades na Grande Mancha Vermelha! Use as setas ← → para mover.',
+      descricao: 'Desvie sua nave das tempestades na Grande Mancha Vermelha! Use ← → para os lados e ↑ ↓ para frente e trás.',
       tipo: 'desvioTempestade',
       duracao: 15
     }
@@ -236,9 +236,9 @@ const planetas = [
     ],
     desafio: {
       nome: 'Anéis de Saturno',
-      descricao: 'Colete os anéis de Saturno desviando dos asteroides! Use ← → para mover.',
+      descricao: 'Desvie dos anéis, meteoros e cometas amarelos de Saturno! Use ← → para mover. Sobreviva 30 segundos.',
       tipo: 'ringCollector',
-      duracao: 25
+      duracao: 30
     }
   },
   {
@@ -264,9 +264,9 @@ const planetas = [
     ],
     desafio: {
       nome: 'Gelo de Urano',
-      descricao: 'Colete cristais de gelo desviando dos detritos! Use WASD para mover.',
+      descricao: 'Colete cristais de gelo desviando dos detritos! Use WASD para mover. Você tem 1 minuto.',
       tipo: 'uranoIce',
-      duracao: 20
+      duracao: 60
     }
   },
   {
@@ -320,9 +320,9 @@ const planetas = [
     ],
     desafio: {
       nome: 'Fuja dos Ventos de Netuno',
-      descricao: 'Desvie dos ventos supersônicos de Netuno! As rajadas vêm de direções aleatórias. Use WASD para mover a nave.',
+      descricao: 'Netuno tem ventos muito fortes! As rajadas 💨 empurram sua nave. Use WASD ou setas para se manter no centro da tela. Sobreviva 30 segundos.',
       tipo: 'fugaVentos',
-      duracao: 20
+      duracao: 30
     }
   },
   {

@@ -5,8 +5,23 @@ const Jogos = {
   _onResultado: null,
   ultimoPlaneta: null,
   ultimoContainer: null,
+  _controlesTouchEl: null,
   canvasW: 400,
   canvasH: 500,
+
+  mapControlesTouch: {
+    solarFlare: 'dpad',
+    mercuryDash: 'horizontal-tap',
+    venusEscape: 'dpad',
+    desvioMeteoros: 'horizontal-hold',
+    pousoLunar: 'pouso',
+    cliqueMeteoros: 'tiro',
+    desvioTempestade: 'dpad',
+    ringCollector: 'horizontal-hold',
+    uranoIce: 'dpad',
+    fugaVentos: 'dpad',
+    plutoMiner: 'dpad'
+  },
 
   init() {
     document.addEventListener('keydown', (e) => {
@@ -16,6 +31,111 @@ const Jogos = {
     document.addEventListener('keyup', (e) => {
       this.teclasPressionadas[e.key] = false;
     });
+  },
+
+  usarControlesTouch() {
+    return ('ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth < 768);
+  },
+
+  removerControlesTouch() {
+    this._controlesTouchEl?.remove();
+    this._controlesTouchEl = null;
+  },
+
+  vincularBotaoTouch(btn, key, modo) {
+    const pressionar = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      btn.classList.add('ativo');
+      this.teclasPressionadas[key] = true;
+      if (modo === 'tap') {
+        setTimeout(() => { this.teclasPressionadas[key] = false; }, 80);
+      }
+    };
+    const soltar = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      btn.classList.remove('ativo');
+      if (modo !== 'tap') this.teclasPressionadas[key] = false;
+    };
+
+    btn.addEventListener('touchstart', pressionar, { passive: false });
+    btn.addEventListener('touchend', soltar, { passive: false });
+    btn.addEventListener('touchcancel', soltar, { passive: false });
+    btn.addEventListener('mousedown', pressionar);
+    btn.addEventListener('mouseup', soltar);
+    btn.addEventListener('mouseleave', soltar);
+  },
+
+  criarBotaoTouch(key, label, extraClass = '') {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = `controle-touch-btn ${extraClass}`.trim();
+    btn.dataset.key = key;
+    btn.textContent = label;
+    btn.setAttribute('aria-label', key.replace('Arrow', ''));
+    return btn;
+  },
+
+  criarControlesTouch(area, tipo) {
+    if (!this.usarControlesTouch() || !tipo || tipo === 'tiro') return null;
+
+    this.removerControlesTouch();
+    const wrap = document.createElement('div');
+    wrap.className = `controles-touch controles-touch--${tipo}`;
+    wrap.setAttribute('aria-label', 'Controles touch');
+
+    const modo = tipo === 'horizontal-tap' ? 'tap' : 'hold';
+
+    if (tipo === 'horizontal-hold' || tipo === 'horizontal-tap') {
+      const esq = this.criarBotaoTouch('ArrowLeft', '←', 'controle-esq');
+      const dir = this.criarBotaoTouch('ArrowRight', '→', 'controle-dir');
+      this.vincularBotaoTouch(esq, 'ArrowLeft', modo);
+      this.vincularBotaoTouch(dir, 'ArrowRight', modo);
+      wrap.appendChild(esq);
+      wrap.appendChild(dir);
+    } else if (tipo === 'dpad' || tipo === 'pouso') {
+      const grid = document.createElement('div');
+      grid.className = 'controles-touch-grid';
+      const botoes = [
+        { key: 'ArrowUp', label: '↑', cls: 'controle-cima slot-cima' },
+        { key: 'ArrowLeft', label: '←', cls: 'controle-esq slot-esq' },
+        { key: 'ArrowDown', label: '↓', cls: 'controle-baixo slot-baixo' },
+        { key: 'ArrowRight', label: '→', cls: 'controle-dir slot-dir' }
+      ];
+      botoes.forEach(({ key, label, cls }) => {
+        const btn = this.criarBotaoTouch(key, label, cls);
+        this.vincularBotaoTouch(btn, key, 'hold');
+        grid.appendChild(btn);
+      });
+      wrap.appendChild(grid);
+    }
+
+    area.classList.add('area-jogo-com-touch');
+    area.appendChild(wrap);
+    this._controlesTouchEl = wrap;
+    return wrap;
+  },
+
+  configurarToqueCanvas(canvas, callback) {
+    const handler = (clientX, clientY) => {
+      const rect = canvas.getBoundingClientRect();
+      const escalaX = canvas.width / rect.width;
+      const escalaY = canvas.height / rect.height;
+      callback((clientX - rect.left) * escalaX, (clientY - rect.top) * escalaY);
+    };
+
+    canvas.addEventListener('click', (e) => handler(e.clientX, e.clientY));
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const t = e.changedTouches[0];
+      if (t) handler(t.clientX, t.clientY);
+    }, { passive: false });
+    canvas.style.touchAction = 'none';
+  },
+
+  dicaControles(textoTeclado, textoTouch) {
+    return this.usarControlesTouch() ? textoTouch : textoTeclado;
   },
 
   setCallback(fn) {
@@ -45,6 +165,11 @@ const Jogos = {
     areaJogo.className = 'area-jogo area-jogo-arcade';
     container.appendChild(areaJogo);
 
+    const tipoControle = this.mapControlesTouch[desafio.tipo];
+    if (tipoControle) {
+      this.criarControlesTouch(areaJogo, tipoControle);
+    }
+
     switch (desafio.tipo) {
       case 'solarFlare': this.jogoSolarFlare(desafio, areaJogo, container); break;
       case 'mercuryDash': this.jogoMercuryDash(desafio, areaJogo, container); break;
@@ -71,7 +196,7 @@ const Jogos = {
         <p>${mensagem}</p>
         <div class="jogo-resultado-botoes">
           ${venceu ? `<button class="btn-jogo btn-continuar-jogo">Continuar</button>` :
-          `<button class="btn-jogo btn-fechar-jogo">Fechar</button>
+          `<button class="btn-voltar btn-fechar-jogo">Fechar</button>
            <button class="btn-jogo btn-tentar" id="btn-tentar-novamente">🔄 Tentar Novamente</button>`}
         </div>
       </div>
@@ -96,6 +221,8 @@ const Jogos = {
       cancelAnimationFrame(this.animacaoId);
       this.animacaoId = null;
     }
+    this.removerControlesTouch();
+    this.teclasPressionadas = {};
     this.jogoAtivo = null;
   },
 
@@ -104,7 +231,8 @@ const Jogos = {
     canvas.width = this.canvasW;
     canvas.height = this.canvasH;
     canvas.className = 'arcade-canvas';
-    area.appendChild(canvas);
+    canvas.style.touchAction = 'none';
+    area.insertBefore(canvas, area.firstChild);
     return canvas.getContext('2d');
   },
 
@@ -230,7 +358,7 @@ const Jogos = {
       ctx.fillStyle = '#8899bb';
       ctx.font = '11px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('WASD para desviar', 200, this.canvasH - 8);
+      ctx.fillText(this.dicaControles('WASD para desviar', 'Use os botões ou deslize'), 200, this.canvasH - 8);
 
       if (tempoRestante <= 0) {
         ativo = false;
@@ -270,7 +398,7 @@ const Jogos = {
 
       velocidade = Math.min(8, 4 + (desafio.duracao - tempoRestante) / 8);
 
-      if (Math.random() < 0.02 * (velocidade / 4)) {
+      if (Math.random() < 0.015 * (velocidade / 4)) {
         const faixa = Math.floor(Math.random() * 3);
         obstaculos.push({
           faixa: faixa,
@@ -294,17 +422,17 @@ const Jogos = {
         return o.y < this.canvasH + 50;
       });
 
-      if ((this.teclasPressionadas['ArrowUp'] || this.teclasPressionadas['w'] || this.teclasPressionadas['W']) && faixaAtual > 0) {
+      if ((this.teclasPressionadas['ArrowLeft'] || this.teclasPressionadas['a'] || this.teclasPressionadas['A']) && faixaAtual > 0) {
         faixaAtual--;
-        this.teclasPressionadas['ArrowUp'] = false;
-        this.teclasPressionadas['w'] = false;
-        this.teclasPressionadas['W'] = false;
+        this.teclasPressionadas['ArrowLeft'] = false;
+        this.teclasPressionadas['a'] = false;
+        this.teclasPressionadas['A'] = false;
       }
-      if ((this.teclasPressionadas['ArrowDown'] || this.teclasPressionadas['s'] || this.teclasPressionadas['S']) && faixaAtual < 2) {
+      if ((this.teclasPressionadas['ArrowRight'] || this.teclasPressionadas['d'] || this.teclasPressionadas['D']) && faixaAtual < 2) {
         faixaAtual++;
-        this.teclasPressionadas['ArrowDown'] = false;
-        this.teclasPressionadas['s'] = false;
-        this.teclasPressionadas['S'] = false;
+        this.teclasPressionadas['ArrowRight'] = false;
+        this.teclasPressionadas['d'] = false;
+        this.teclasPressionadas['D'] = false;
       }
 
       const naveX = faixas[faixaAtual];
@@ -336,7 +464,7 @@ const Jogos = {
       ctx.fillStyle = '#8899bb';
       ctx.font = '11px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('↑ ↓ para trocar de faixa', 200, this.canvasH - 8);
+      ctx.fillText(this.dicaControles('← → para trocar de faixa', 'Toque ← → para trocar de faixa'), 200, this.canvasH - 8);
 
       if (tempoRestante <= 0) {
         ativo = false;
@@ -428,7 +556,7 @@ const Jogos = {
       ctx.fillStyle = '#8899bb';
       ctx.font = '11px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('WASD para escalar 💀 Vermelho = perigo', 200, this.canvasH - 8);
+      ctx.fillText(this.dicaControles('WASD para escalar 💀 Vermelho = perigo', 'Toque direcional | 💀 Vermelho = perigo'), 200, this.canvasH - 8);
 
       if (tempoRestante <= 0) {
         ativo = false;
@@ -448,7 +576,6 @@ const Jogos = {
     let itens = [];
     let tempoRestante = desafio.duracao;
     let ativo = true;
-    let coletados = 0;
 
     const loop = () => {
       if (!ativo) return;
@@ -473,22 +600,31 @@ const Jogos = {
       ctx.stroke();
       ctx.restore();
 
-      if (Math.random() < 0.03) {
-        if (Math.random() < 0.5) {
+      if (Math.random() < 0.065) {
+        const roll = Math.random();
+        if (roll < 0.4) {
           itens.push({
             x: Math.random() * (this.canvasW - 20) + 10,
             y: -20,
             tipo: 'anel',
-            tamanho: 12 + Math.random() * 8,
-            vy: 1 + Math.random() * 1.5
+            tamanho: 12 + Math.random() * 10,
+            vy: 1.2 + Math.random() * 1.8
+          });
+        } else if (roll < 0.7) {
+          itens.push({
+            x: Math.random() * (this.canvasW - 20) + 10,
+            y: -20,
+            tipo: 'meteoro',
+            tamanho: 10 + Math.random() * 12,
+            vy: 1.4 + Math.random() * 2
           });
         } else {
           itens.push({
             x: Math.random() * (this.canvasW - 20) + 10,
             y: -20,
-            tipo: 'astroide',
-            tamanho: 10 + Math.random() * 12,
-            vy: 1.5 + Math.random() * 2
+            tipo: 'cometa',
+            tamanho: 11 + Math.random() * 10,
+            vy: 1.3 + Math.random() * 1.9
           });
         }
       }
@@ -496,27 +632,44 @@ const Jogos = {
       itens = itens.filter(item => {
         item.y += item.vy;
         if (item.tipo === 'anel') {
-          ctx.strokeStyle = '#EAD6A5';
+          ctx.strokeStyle = '#FDB813';
           ctx.lineWidth = 3;
           ctx.shadowColor = '#EAD6A5';
-          ctx.shadowBlur = 10;
+          ctx.shadowBlur = 12;
           ctx.beginPath();
           ctx.ellipse(item.x, item.y, item.tamanho, item.tamanho * 0.4, Date.now() / 2000, 0, Math.PI * 2);
           ctx.stroke();
           ctx.shadowBlur = 0;
-        } else {
-          const grad2 = ctx.createRadialGradient(item.x, item.y, 2, item.x, item.y, item.tamanho);
-          grad2.addColorStop(0, '#666');
-          grad2.addColorStop(0.5, '#444');
-          grad2.addColorStop(1, '#222');
-          ctx.fillStyle = grad2;
+        } else if (item.tipo === 'meteoro') {
+          const grad = ctx.createRadialGradient(item.x, item.y, 2, item.x, item.y, item.tamanho);
+          grad.addColorStop(0, '#fff8cc');
+          grad.addColorStop(0.35, '#FDB813');
+          grad.addColorStop(1, '#c4950a');
+          ctx.fillStyle = grad;
+          ctx.shadowColor = '#FDB813';
+          ctx.shadowBlur = 8;
           ctx.beginPath();
           ctx.arc(item.x, item.y, item.tamanho, 0, Math.PI * 2);
           ctx.fill();
-          ctx.fillStyle = 'rgba(100,100,100,0.3)';
+          ctx.shadowBlur = 0;
+        } else {
+          ctx.fillStyle = '#FDB813';
+          ctx.shadowColor = '#EAD6A5';
+          ctx.shadowBlur = 10;
           ctx.beginPath();
-          ctx.arc(item.x - 2, item.y - 2, item.tamanho * 0.5, 0, Math.PI * 2);
+          ctx.arc(item.x, item.y, item.tamanho * 0.45, 0, Math.PI * 2);
           ctx.fill();
+          ctx.strokeStyle = 'rgba(253, 184, 19, 0.5)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(item.x, item.y);
+          ctx.lineTo(item.x - item.tamanho * 1.8, item.y - item.tamanho * 0.6);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(item.x, item.y);
+          ctx.lineTo(item.x - item.tamanho * 1.4, item.y + item.tamanho * 0.4);
+          ctx.stroke();
+          ctx.shadowBlur = 0;
         }
         return item.y < this.canvasH + 30;
       });
@@ -530,14 +683,14 @@ const Jogos = {
         const dx = naveX - item.x;
         const dy = 430 - item.y;
         if (Math.sqrt(dx * dx + dy * dy) < item.tamanho + 15) {
-          if (item.tipo === 'anel') {
-            coletados++;
-            itens.splice(i, 1);
-          } else {
-            ativo = false;
-            this.finalizarJogo(container, false, 'Asteroides danificaram sua nave!');
-            return;
-          }
+          ativo = false;
+          const msgs = {
+            anel: 'Colidiu com os anéis de Saturno!',
+            meteoro: 'Atingido por um meteoro!',
+            cometa: 'Atingido por um cometa!'
+          };
+          this.finalizarJogo(container, false, msgs[item.tipo] || 'Colisão!');
+          return;
         }
       }
 
@@ -552,15 +705,15 @@ const Jogos = {
       ctx.fill();
       ctx.shadowBlur = 0;
 
-      this.desenharHUD(ctx, `⏱ ${Math.ceil(tempoRestante)}s`, `💍 ${coletados}`);
+      this.desenharHUD(ctx, `⏱ ${Math.ceil(tempoRestante)}s`, `💫 ${itens.length}`);
       ctx.fillStyle = '#8899bb';
       ctx.font = '11px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('← → mover | 💛 anel 💀 asteroide', 200, this.canvasH - 8);
+      ctx.fillText(this.dicaControles('← → mover | Desvie dos anéis, meteoros e cometas amarelos', 'Toque ← → | Desvie dos obstáculos amarelos'), this.canvasW / 2, this.canvasH - 8);
 
       if (tempoRestante <= 0) {
         ativo = false;
-        this.finalizarJogo(container, coletados >= 10, coletados >= 10 ? `Coletou ${coletados} anéis!` : `Só ${coletados} anéis. Precisa de 10!`);
+        this.finalizarJogo(container, true, 'Sobreviveu aos anéis de Saturno!');
         return;
       }
       tempoRestante -= 1 / 60;
@@ -656,7 +809,7 @@ const Jogos = {
       ctx.fillStyle = '#8899bb';
       ctx.font = '11px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('WASD mover | ❄️ cristal (colete) | detritos (evite)', 200, this.canvasH - 8);
+      ctx.fillText(this.dicaControles('WASD mover | ❄️ cristal (colete) | detritos (evite)', 'Toque direcional | ❄️ colete | detritos evite'), 200, this.canvasH - 8);
 
       if (tempoRestante <= 0) {
         ativo = false;
@@ -771,7 +924,7 @@ const Jogos = {
       ctx.fillStyle = '#8899bb';
       ctx.font = '11px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('WASD mover | 💎 cristais | 🔴 meteoros (evite)', 200, this.canvasH - 8);
+      ctx.fillText(this.dicaControles('WASD mover | 💎 cristais | 🔴 meteoros (evite)', 'Toque direcional | 💎 colete | 🔴 evite'), 200, this.canvasH - 8);
 
       if (tempoRestante <= 0) {
         ativo = false;
@@ -787,17 +940,48 @@ const Jogos = {
   // --- POUSO LUNAR (improved arcade) ---
   jogoPousoLunar(desafio, area, container) {
     const ctx = this.criarCanvas(area);
+    const canvas = area.querySelector('canvas');
+    canvas.tabIndex = 0;
+    canvas.focus();
+
     let nave = { x: 200, y: 50, vy: 0, vx: 0 };
     let combustivel = desafio.combustivel;
-    let pousou = false, falhou = false;
+    let ativo = true;
     const soloY = 460;
+    const shipHalfW = 12;
+    const shipFeet = 15;
+    const padX = 120;
+    const padW = 160;
+    const potenciaMotor = 0.38;
+    const maxVyPouso = 4;
+    const maxVxPouso = 2.5;
+
+    const estaSobrePad = () => {
+      const esq = nave.x - shipHalfW;
+      const dir = nave.x + shipHalfW;
+      return dir > padX && esq < padX + padW;
+    };
+
+    const velocidadeSegura = () =>
+      Math.abs(nave.vy) <= maxVyPouso && Math.abs(nave.vx) <= maxVxPouso;
 
     const loop = () => {
-      if (pousou || falhou) return;
+      if (!ativo) return;
       this.desenharBackground(ctx, '#0a0a2e', '#050518');
 
       ctx.fillStyle = '#666';
       ctx.fillRect(0, soloY, this.canvasW, this.canvasH - soloY);
+      ctx.fillStyle = 'rgba(80, 200, 120, 0.3)';
+      ctx.fillRect(padX, soloY - 4, padW, this.canvasH - soloY + 4);
+      ctx.strokeStyle = 'rgba(80, 200, 120, 0.9)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.strokeRect(padX, soloY - 2, padW, 10);
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(80, 200, 120, 0.85)';
+      ctx.font = 'bold 11px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('POUSO', padX + padW / 2, soloY - 8);
       ctx.fillStyle = '#888';
       for (let i = 0; i < this.canvasW; i += 15) {
         ctx.beginPath();
@@ -805,12 +989,14 @@ const Jogos = {
         ctx.fill();
       }
 
-      if (this.teclasPressionadas['ArrowUp'] && combustivel > 0) { nave.vy -= 0.15; combustivel -= 0.5; }
-      if (this.teclasPressionadas['ArrowLeft'] && combustivel > 0) { nave.vx -= 0.1; combustivel -= 0.2; }
-      if (this.teclasPressionadas['ArrowRight'] && combustivel > 0) { nave.vx += 0.1; combustivel -= 0.2; }
-      if (this.teclasPressionadas['ArrowDown'] && combustivel > 0) { nave.vy += 0.1; combustivel -= 0.3; }
+      const acelerando = (this.teclasPressionadas['ArrowUp'] || this.teclasPressionadas['w'] || this.teclasPressionadas['W']) && combustivel > 0;
+      if (acelerando) { nave.vy -= potenciaMotor; combustivel -= 0.4; }
+      if (this.teclasPressionadas['ArrowLeft'] && combustivel > 0) { nave.vx -= 0.08; combustivel -= 0.15; }
+      if (this.teclasPressionadas['ArrowRight'] && combustivel > 0) { nave.vx += 0.08; combustivel -= 0.15; }
+      if (this.teclasPressionadas['ArrowDown'] && combustivel > 0) { nave.vy += 0.06; combustivel -= 0.25; }
 
       nave.vy += desafio.gravidade;
+      nave.vx *= 0.98;
       nave.x += nave.vx;
       nave.y += nave.vy;
       nave.x = Math.max(20, Math.min(this.canvasW - 20, nave.x));
@@ -825,7 +1011,7 @@ const Jogos = {
       ctx.beginPath(); ctx.moveTo(0, 15); ctx.lineTo(-12, -12); ctx.lineTo(12, -12); ctx.closePath(); ctx.fill();
       ctx.fillStyle = '#4488ff'; ctx.fillRect(-2, 15, 4, 6);
       ctx.shadowBlur = 0;
-      if ((this.teclasPressionadas['ArrowUp'] || this.teclasPressionadas['w'] || this.teclasPressionadas['W']) && combustivel > 0) {
+      if (acelerando) {
         ctx.fillStyle = '#ff8800'; ctx.shadowColor = '#ff8800'; ctx.shadowBlur = 10;
         ctx.beginPath(); ctx.moveTo(-6, 24); ctx.lineTo(0, 40); ctx.lineTo(6, 24); ctx.closePath(); ctx.fill();
         ctx.fillStyle = '#ffcc00'; ctx.shadowBlur = 5;
@@ -833,112 +1019,203 @@ const Jogos = {
       }
       ctx.restore();
 
-      if (nave.y >= soloY - 15) {
-        nave.y = soloY - 15;
-        if (Math.abs(nave.vy) > 2 || Math.abs(nave.vx) > 1) {
-          falhou = true;
-          this.finalizarJogo(container, false, `Pouso brusco! Vel: ${Math.abs(nave.vy).toFixed(1)}`);
+      const tocouSolo = nave.y + shipFeet >= soloY;
+      if (tocouSolo) {
+        ativo = false;
+        nave.y = soloY - shipFeet;
+        const noPad = estaSobrePad();
+        const velOk = velocidadeSegura();
+        if (noPad && velOk) {
+          this.finalizarJogo(container, true, `Pouso lunar concluído! Velocidade: ${Math.abs(nave.vy).toFixed(1)}`);
+        } else if (noPad && !velOk) {
+          this.finalizarJogo(container, false,
+            `Você acertou a plataforma, mas pousou rápido demais (${Math.abs(nave.vy).toFixed(1)}). Segure ↑ para frear antes de tocar o solo.`);
+        } else if (!noPad && velOk) {
+          this.finalizarJogo(container, false,
+            'Velocidade ok, mas a nave ficou fora da área verde. Use ← → para alinhar antes de pousar.');
         } else {
-          pousou = true;
-          this.finalizarJogo(container, true, `Pouso perfeito! Vel: ${Math.abs(nave.vy).toFixed(1)}`);
+          this.finalizarJogo(container, false,
+            `Fora da plataforma e velocidade alta (${Math.abs(nave.vy).toFixed(1)}). Freie com ↑ e alinhe na área verde.`);
         }
         return;
       }
 
+      const velCor = velocidadeSegura() ? '#6f6' : (Math.abs(nave.vy) <= maxVyPouso + 1.5 ? '#fc6' : '#f66');
+      const padCor = estaSobrePad() ? '#6f6' : '#f96';
       ctx.fillStyle = '#fff';
       ctx.font = 'bold 14px monospace';
       ctx.textAlign = 'left';
-      ctx.fillText(`⬇ ${Math.abs(nave.vy).toFixed(1)}`, 10, 22);
+      ctx.fillText(`⬇ ${Math.abs(nave.vy).toFixed(1)} / ${maxVyPouso}`, 10, 22);
       ctx.textAlign = 'right';
       ctx.fillText(`⛽ ${Math.max(0, combustivel).toFixed(0)}%`, this.canvasW - 10, 22);
+      ctx.textAlign = 'left';
+      ctx.font = '12px monospace';
+      ctx.fillStyle = velCor;
+      ctx.fillText(velocidadeSegura() ? '✓ Velocidade segura' : '⚠ Freie com ↑', 10, 42);
+      ctx.fillStyle = padCor;
+      ctx.fillText(estaSobrePad() ? '✓ Sobre a plataforma' : '← → Alinhe na área verde', 10, 58);
       ctx.fillStyle = '#8899bb';
       ctx.font = '11px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('↑ acelerar  ← → mover  ↓ descer', 200, this.canvasH - 8);
+      ctx.fillText(this.dicaControles('↑ frear  ← → mover  ↓ descer', 'Toque ↑ frear  ← → mover  ↓ descer'), this.canvasW / 2, this.canvasH - 8);
 
       this.animacaoId = requestAnimationFrame(loop);
     };
     loop();
   },
 
-  // --- CLIQUE METEOROS (improved) ---
+  // --- CAÇA METEOROS MARTE (tiro) ---
   jogoCliqueMeteoros(desafio, area, container) {
+    const ctx = this.criarCanvas(area);
+    const canvas = area.querySelector('canvas');
     let coletados = 0;
     const total = desafio.totalMeteoros;
     let ativo = true;
-    let erros = 0;
+    let tempoRestante = desafio.duracao;
+    let meteoros = [];
+    let tiros = [];
+    let spawnTimer = 0;
+    const nave = { x: this.canvasW / 2, y: this.canvasH - 36 };
+    const velTiro = 16;
+    const raioTiro = 6;
 
-    area.innerHTML = `
-      <div class="meteoros-container">
-        <div class="meteoros-info">
-          <span>☄️ <strong id="meteoros-coletados">0</strong>/${total}</span>
-          <span>💥 Erros: <strong id="meteoros-erros">0</strong></span>
-        </div>
-        <div class="meteoros-area" id="meteoros-area"></div>
-      </div>
-    `;
-
-    const areaJogo = document.getElementById('meteoros-area');
-
-    const criarMeteoro = () => {
+    const disparar = (alvoX, alvoY) => {
       if (!ativo) return;
-      const meteoro = document.createElement('div');
-      meteoro.className = 'meteoro-item';
-      const x = Math.random() * (areaJogo.clientWidth - 50);
-      meteoro.style.left = `${x}px`;
-      meteoro.style.top = '-40px';
+      const ang = Math.atan2(alvoY - nave.y, alvoX - nave.x);
+      tiros.push({
+        x: nave.x,
+        y: nave.y,
+        vx: Math.cos(ang) * velTiro,
+        vy: Math.sin(ang) * velTiro
+      });
+    };
 
-      const ehBom = Math.random() < 0.6;
-      meteoro.textContent = ehBom ? '☄️' : '💥';
-      meteoro.dataset.bom = ehBom;
-      meteoro.style.fontSize = `${24 + Math.random() * 20}px`;
+    this.configurarToqueCanvas(canvas, disparar);
 
-      meteoro.addEventListener('click', () => {
-        if (!ativo) return;
-        if (meteoro.dataset.bom === 'true') {
-          coletados++;
-          document.getElementById('meteoros-coletados').textContent = coletados;
-          meteoro.remove();
-          if (coletados >= total) {
-            ativo = false;
-            this.finalizarJogo(container, true, `Todos os ${total} meteoros coletados!`);
-          }
-        } else {
-          erros++;
-          document.getElementById('meteoros-erros').textContent = erros;
-          meteoro.style.background = 'rgba(255,0,0,0.3)';
-          setTimeout(() => meteoro.remove(), 200);
-          if (erros >= 3) {
-            ativo = false;
-            this.finalizarJogo(container, false, 'Muitos erros! Pegue só meteoros ☄️');
+    const loop = () => {
+      if (!ativo) return;
+      spawnTimer++;
+      if (spawnTimer >= 55) {
+        spawnTimer = 0;
+        meteoros.push({
+          x: 30 + Math.random() * (this.canvasW - 60),
+          y: -25,
+          vy: 0.55 + Math.random() * 0.45,
+          r: 16 + Math.random() * 8,
+          bom: Math.random() < 0.62
+        });
+      }
+
+      this.desenharBackground(ctx, '#1a0808', '#0a0404');
+
+      ctx.fillStyle = '#6b2d0f';
+      ctx.fillRect(0, this.canvasH - 28, this.canvasW, 28);
+      ctx.fillStyle = '#8b4513';
+      for (let i = 0; i < this.canvasW; i += 22) {
+        ctx.beginPath();
+        ctx.arc(i + 4, this.canvasH - 14, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      tiros = tiros.filter(t => {
+        t.x += t.vx;
+        t.y += t.vy;
+        if (t.x < -10 || t.x > this.canvasW + 10 || t.y < -10 || t.y > this.canvasH + 10) return false;
+
+        ctx.strokeStyle = '#88ddff';
+        ctx.lineWidth = 3;
+        ctx.shadowColor = '#4488ff';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.moveTo(t.x - t.vx * 0.6, t.y - t.vy * 0.6);
+        ctx.lineTo(t.x, t.y);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        for (let i = meteoros.length - 1; i >= 0; i--) {
+          const m = meteoros[i];
+          const dx = t.x - m.x;
+          const dy = t.y - m.y;
+          if (Math.sqrt(dx * dx + dy * dy) < m.r + raioTiro) {
+            if (m.bom) {
+              coletados++;
+              if (coletados >= total) {
+                ativo = false;
+                this.finalizarJogo(container, true, `Todos os ${total} meteoros abatidos!`);
+                return false;
+              }
+            }
+            meteoros.splice(i, 1);
+            return false;
           }
         }
+        return true;
       });
 
-      areaJogo.appendChild(meteoro);
-      let y = -40;
-      const vel = 1.5 + Math.random() * 2;
-      const cair = setInterval(() => {
-        if (!ativo) { clearInterval(cair); meteoro.remove(); return; }
-        y += vel;
-        meteoro.style.top = `${y}px`;
-        if (y > areaJogo.clientHeight + 40) {
-          clearInterval(cair); meteoro.remove();
-          if (meteoro.dataset.bom === 'true' && ativo) {
+      meteoros = meteoros.filter(m => {
+        m.y += m.vy;
+        if (m.y - m.r > this.canvasH - 28) {
+          if (m.bom && ativo) {
             ativo = false;
             this.finalizarJogo(container, false, 'Um meteoro caiu em Marte!');
           }
+          return false;
         }
-      }, 30);
-    };
 
-    setInterval(() => { if (ativo) criarMeteoro(); }, 700);
-    setTimeout(() => {
-      if (ativo && coletados < total) {
+        const grad = ctx.createRadialGradient(m.x, m.y, 2, m.x, m.y, m.r);
+        if (m.bom) {
+          grad.addColorStop(0, '#fff');
+          grad.addColorStop(0.4, '#ffaa44');
+          grad.addColorStop(1, '#aa4400');
+        } else {
+          grad.addColorStop(0, '#fff');
+          grad.addColorStop(0.4, '#ff6644');
+          grad.addColorStop(1, '#661100');
+        }
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.font = `${Math.round(m.r * 1.1)}px serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(m.bom ? '☄️' : '💥', m.x, m.y);
+        return true;
+      });
+
+      ctx.fillStyle = '#4488ff';
+      ctx.shadowColor = '#4488ff';
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.moveTo(nave.x, nave.y - 16);
+      ctx.lineTo(nave.x - 14, nave.y + 10);
+      ctx.lineTo(nave.x + 14, nave.y + 10);
+      ctx.closePath();
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 14px monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText(`☄️ ${coletados}/${total}`, 10, 22);
+      ctx.textAlign = 'center';
+      ctx.fillText(`⏱ ${Math.ceil(tempoRestante)}s`, this.canvasW / 2, 22);
+      ctx.fillStyle = '#8899bb';
+      ctx.font = '11px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(this.dicaControles('Clique para disparar | Abata os meteoros ☄️', 'Toque na tela para disparar ☄️'), this.canvasW / 2, this.canvasH - 8);
+
+      tempoRestante -= 1 / 60;
+      if (tempoRestante <= 0) {
         ativo = false;
         this.finalizarJogo(container, false, 'Tempo esgotado!');
+        return;
       }
-    }, desafio.duracao * 1000);
+
+      this.animacaoId = requestAnimationFrame(loop);
+    };
+    loop();
   },
 
   // --- DESVIO METEOROS (improved) ---
@@ -1003,7 +1280,7 @@ const Jogos = {
       ctx.fillStyle = '#8899bb';
       ctx.font = '11px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('← → para desviar', 200, this.canvasH - 5);
+      ctx.fillText(this.dicaControles('← → para desviar', 'Toque ← → para desviar'), 200, this.canvasH - 5);
 
       if (tempoRestante <= 0) {
         ativo = false;
@@ -1019,8 +1296,12 @@ const Jogos = {
   // --- DESVIO TEMPESTADE (improved) ---
   jogoDesvioTempestade(desafio, area, container) {
     const ctx = this.criarCanvas(area);
-    let naveX = 200, tempoRestante = desafio.duracao;
+    let naveX = 200;
+    let naveY = 430;
+    let tempoRestante = desafio.duracao;
     let tempestades = [], ativo = true;
+    const minY = 160;
+    const maxY = this.canvasH - 40;
 
     const loop = () => {
       if (!ativo) return;
@@ -1037,12 +1318,12 @@ const Jogos = {
       ctx.fillStyle = 'rgba(139,0,0,0.3)';
       ctx.beginPath(); ctx.arc(200 + Math.sin(Date.now()/800)*10, 80, 80, 0, Math.PI * 2); ctx.fill();
 
-      if (Math.random() < 0.035) {
+      if (Math.random() < 0.028) {
         const lado = Math.random() > 0.5 ? 1 : -1;
         tempestades.push({
           x: lado === 1 ? -20 : this.canvasW + 20,
-          y: 130 + Math.random() * 280,
-          vx: lado * (2 + Math.random() * 2.5),
+          y: minY + Math.random() * (maxY - minY),
+          vx: lado * (0.9 + Math.random() * 1.1),
           tamanho: 18 + Math.random() * 25
         });
       }
@@ -1056,12 +1337,15 @@ const Jogos = {
         return t.x > -50 && t.x < this.canvasW + 50;
       });
 
-      if (this.teclasPressionadas['ArrowLeft']) naveX -= 4;
-      if (this.teclasPressionadas['ArrowRight']) naveX += 4;
+      if (this.teclasPressionadas['ArrowLeft'] || this.teclasPressionadas['a'] || this.teclasPressionadas['A']) naveX -= 4;
+      if (this.teclasPressionadas['ArrowRight'] || this.teclasPressionadas['d'] || this.teclasPressionadas['D']) naveX += 4;
+      if (this.teclasPressionadas['ArrowUp'] || this.teclasPressionadas['w'] || this.teclasPressionadas['W']) naveY -= 4;
+      if (this.teclasPressionadas['ArrowDown'] || this.teclasPressionadas['s'] || this.teclasPressionadas['S']) naveY += 4;
       naveX = Math.max(15, Math.min(this.canvasW - 15, naveX));
+      naveY = Math.max(minY, Math.min(maxY, naveY));
 
       for (const t of tempestades) {
-        if (Math.sqrt((naveX - t.x) ** 2 + (430 - t.y) ** 2) < t.tamanho + 15) {
+        if (Math.sqrt((naveX - t.x) ** 2 + (naveY - t.y) ** 2) < t.tamanho + 15) {
           ativo = false;
           this.finalizarJogo(container, false, 'Atingido por tempestade!');
           return;
@@ -1071,14 +1355,14 @@ const Jogos = {
       ctx.fillStyle = '#4488ff';
       ctx.shadowColor = '#4488ff';
       ctx.shadowBlur = 12;
-      ctx.beginPath(); ctx.moveTo(naveX, 430 - 15); ctx.lineTo(naveX - 10, 430 + 5); ctx.lineTo(naveX + 10, 430 + 5); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(naveX, naveY - 15); ctx.lineTo(naveX - 10, naveY + 5); ctx.lineTo(naveX + 10, naveY + 5); ctx.closePath(); ctx.fill();
       ctx.shadowBlur = 0;
 
       this.desenharHUD(ctx, `⏱ ${Math.ceil(tempoRestante)}s`, `🌪️ ${tempestades.length}`);
       ctx.fillStyle = '#8899bb';
       ctx.font = '11px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('← → desviar da Grande Mancha Vermelha', 200, this.canvasH - 8);
+      ctx.fillText(this.dicaControles('← → lados  ↑ ↓ frente/trás  |  Desvie da Grande Mancha Vermelha', 'Toque direcional | Desvie da tempestade'), this.canvasW / 2, this.canvasH - 8);
 
       if (tempoRestante <= 0) {
         ativo = false;
@@ -1096,42 +1380,72 @@ const Jogos = {
     const ctx = this.criarCanvas(area);
     let naveX = 200, naveY = 250, tempoRestante = desafio.duracao;
     let ventos = [], ativo = true;
+    const tempoTotal = desafio.duracao;
+    const margem = 20;
 
     const loop = () => {
       if (!ativo) return;
       this.desenharBackground(ctx, '#0a0a2e', '#050520');
 
-      if (Math.random() < 0.045) {
+      const tempoDecorrido = tempoTotal - tempoRestante;
+      const taxaSpawn = tempoDecorrido < 4 ? 0 : (tempoDecorrido < 10 ? 0.018 : 0.028);
+
+      ctx.strokeStyle = 'rgba(255, 80, 80, 0.25)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 6]);
+      ctx.strokeRect(margem, margem, this.canvasW - margem * 2, this.canvasH - margem * 2);
+      ctx.setLineDash([]);
+
+      if (Math.random() < taxaSpawn) {
         const angulos = [Math.PI, 0, -Math.PI / 2, Math.PI / 2];
         const ang = angulos[Math.floor(Math.random() * 4)];
+        const vel = 1 + Math.random() * 1.2;
         ventos.push({
-          x: naveX, y: naveY, vx: Math.cos(ang) * (2 + Math.random() * 2), vy: Math.sin(ang) * (2 + Math.random() * 2),
-          vida: 50 + Math.random() * 40
+          x: naveX + Math.cos(ang) * 20,
+          y: naveY + Math.sin(ang) * 20,
+          vx: Math.cos(ang) * vel,
+          vy: Math.sin(ang) * vel,
+          vida: 55 + Math.random() * 35
         });
       }
 
       ventos = ventos.filter(v => {
         v.x += v.vx; v.y += v.vy; v.vida--;
-        ctx.fillStyle = `rgba(100,200,255,${Math.min(0.6, v.vida / 80)})`;
-        ctx.font = '22px monospace'; ctx.textAlign = 'center';
+        const alpha = Math.min(0.7, v.vida / 70);
+        ctx.fillStyle = `rgba(100,200,255,${alpha})`;
+        ctx.font = '20px monospace';
+        ctx.textAlign = 'center';
         ctx.fillText('💨', v.x, v.y);
+        ctx.strokeStyle = `rgba(150,220,255,${alpha * 0.8})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(v.x - v.vx * 8, v.y - v.vy * 8);
+        ctx.lineTo(v.x + v.vx * 14, v.y + v.vy * 14);
+        ctx.stroke();
         const dx = naveX - v.x, dy = naveY - v.y;
-        if (Math.sqrt(dx*dx+dy*dy) < 30) { naveX += v.vx * 2.5; naveY += v.vy * 2.5; }
+        if (Math.sqrt(dx * dx + dy * dy) < 32) {
+          naveX += v.vx * 1.2;
+          naveY += v.vy * 1.2;
+        }
         return v.vida > 0;
       });
 
-      if (this.teclasPressionadas['w'] || this.teclasPressionadas['W']) naveY -= 3;
-      if (this.teclasPressionadas['s'] || this.teclasPressionadas['S']) naveY += 3;
-      if (this.teclasPressionadas['a'] || this.teclasPressionadas['A']) naveX -= 3;
-      if (this.teclasPressionadas['d'] || this.teclasPressionadas['D']) naveX += 3;
-      naveX = Math.max(15, Math.min(this.canvasW - 15, naveX));
-      naveY = Math.max(15, Math.min(this.canvasH - 15, naveY));
+      const esq = this.teclasPressionadas['ArrowLeft'] || this.teclasPressionadas['a'] || this.teclasPressionadas['A'];
+      const dir = this.teclasPressionadas['ArrowRight'] || this.teclasPressionadas['d'] || this.teclasPressionadas['D'];
+      const cima = this.teclasPressionadas['ArrowUp'] || this.teclasPressionadas['w'] || this.teclasPressionadas['W'];
+      const baixo = this.teclasPressionadas['ArrowDown'] || this.teclasPressionadas['s'] || this.teclasPressionadas['S'];
+      if (cima) naveY -= 4.5;
+      if (baixo) naveY += 4.5;
+      if (esq) naveX -= 4.5;
+      if (dir) naveX += 4.5;
 
-      if (naveX <= 15 || naveX >= this.canvasW - 15 || naveY <= 15 || naveY >= this.canvasH - 15) {
+      if (naveX < margem || naveX > this.canvasW - margem || naveY < margem || naveY > this.canvasH - margem) {
         ativo = false;
-        this.finalizarJogo(container, false, 'Ventos te empurraram para fora!');
+        this.finalizarJogo(container, false, 'Os ventos empurraram sua nave para fora da zona segura!');
         return;
       }
+      naveX = Math.max(margem, Math.min(this.canvasW - margem, naveX));
+      naveY = Math.max(margem, Math.min(this.canvasH - margem, naveY));
 
       ctx.fillStyle = '#4488ff';
       ctx.shadowColor = '#4488ff';
@@ -1143,7 +1457,12 @@ const Jogos = {
       ctx.fillStyle = '#8899bb';
       ctx.font = '11px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('WASD para desviar dos ventos', 200, this.canvasH - 8);
+      if (tempoDecorrido < 4) {
+        ctx.fillStyle = '#aad4ff';
+        ctx.fillText('Prepare-se! Os ventos de Netuno vão começar em instantes…', this.canvasW / 2, this.canvasH - 8);
+      } else {
+        ctx.fillText(this.dicaControles('WASD / setas — mantenha a nave dentro da área tracejada', 'Toque direcional — mantenha a nave na área tracejada'), this.canvasW / 2, this.canvasH - 8);
+      }
 
       if (tempoRestante <= 0) {
         ativo = false;
