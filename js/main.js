@@ -217,21 +217,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     criarModoExploracao() {
       const main = document.getElementById('main-container');
-      this.roverX = 0;
-      this.roverY = 0;
-      this.roverTeclas = {};
-      this.roverAnimId = null;
 
       main.innerHTML = `
         <div class="mapa-sistema" id="mapa-sistema">
           <div class="mapa-header">
-            <h2>🛸 MODO EXPLORAÇÃO</h2>
-            <p>Use WASD ou setas para mover o rover. Passe o mouse nos planetas para ampliar e clique para ver a ficha!</p>
+            <h2>🚀 MODO EXPLORAÇÃO</h2>
+            <p>Passe o mouse nos planetas para ampliar e clique para ver a ficha técnica!</p>
             <button class="btn-voltar-pequeno" id="explorar-voltar">Menu</button>
           </div>
           <div class="exploracao-wrapper" id="exploracao-wrapper">
             <div class="orbita-container" id="orbita-container"></div>
-            <div class="rover" id="rover">🛸</div>
           </div>
           <div class="exploracao-painel" id="exploracao-painel"></div>
         </div>
@@ -240,76 +235,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       this.criarEstrelas();
       this.criarOrbitasExploracao();
-      this.initRoverControles();
 
       document.getElementById('explorar-voltar').addEventListener('click', () => {
-        this.pararRover();
         this.transicao(() => this.criarTelaInicial());
       });
 
-    },
-
-    initRoverControles() {
-      const handleKey = (e) => {
-        this.roverTeclas[e.key] = e.type === 'keydown';
-      };
-      document.addEventListener('keydown', handleKey);
-      document.addEventListener('keyup', handleKey);
-      this.roverListeners = handleKey;
-      this.roverAnimId = requestAnimationFrame(() => this.atualizarRover());
-    },
-
-    pararRover() {
-      if (this.roverAnimId) cancelAnimationFrame(this.roverAnimId);
-      if (this.roverListeners) {
-        document.removeEventListener('keydown', this.roverListeners);
-        document.removeEventListener('keyup', this.roverListeners);
-      }
-    },
-
-    atualizarRover() {
-      const rover = document.getElementById('rover');
-      if (!rover) { this.roverAnimId = null; return; }
-      const teclas = this.roverTeclas;
-      let dx = 0, dy = 0;
-      if (teclas['w'] || teclas['W'] || teclas['ArrowUp']) dy = -3;
-      if (teclas['s'] || teclas['S'] || teclas['ArrowDown']) dy = 3;
-      if (teclas['a'] || teclas['A'] || teclas['ArrowLeft']) dx = -3;
-      if (teclas['d'] || teclas['D'] || teclas['ArrowRight']) dx = 3;
-
-      if (dx || dy) {
-        this.roverX += dx;
-        this.roverY += dy;
-        const max = 280;
-        this.roverX = Math.max(-max, Math.min(max, this.roverX));
-        this.roverY = Math.max(-max, Math.min(max, this.roverY));
-        rover.style.transform = `translate(-50%,-50%) translate(${this.roverX}px,${this.roverY}px)`;
-        if (dx < 0) rover.style.transform += ' scaleX(-1)';
-        else rover.style.transform = rover.style.transform.replace(' scaleX(-1)', '');
-
-        this.verificarProximidadePlanetas();
-      }
-
-      this.roverAnimId = requestAnimationFrame(() => this.atualizarRover());
-    },
-
-    verificarProximidadePlanetas() {
-      const wrapper = document.getElementById('exploracao-wrapper');
-      if (!wrapper) return;
-      const wrapperRect = wrapper.getBoundingClientRect();
-      const roverEl = document.getElementById('rover');
-      if (!roverEl) return;
-      const roverRect = roverEl.getBoundingClientRect();
-      const cx = roverRect.left + roverRect.width / 2 - wrapperRect.left;
-      const cy = roverRect.top + roverRect.height / 2 - wrapperRect.top;
-
-      document.querySelectorAll('.planeta-link').forEach(el => {
-        const elRect = el.getBoundingClientRect();
-        const ex = elRect.left + elRect.width / 2 - wrapperRect.left;
-        const ey = elRect.top + elRect.height / 2 - wrapperRect.top;
-        const dist = Math.sqrt((cx - ex) ** 2 + (cy - ey) ** 2);
-        el.classList.toggle('rover-perto', dist < 80);
-      });
     },
 
     criarOrbitasExploracao() {

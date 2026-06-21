@@ -70,13 +70,21 @@ const Jogos = {
         <h3>${venceu ? 'Missão Cumprida!' : 'Tente Novamente!'}</h3>
         <p>${mensagem}</p>
         <div class="jogo-resultado-botoes">
-          ${venceu ? `<button class="btn-jogo" onclick="this.closest('.jogo-resultado').remove()">Continuar</button>` :
-          `<button class="btn-jogo" onclick="this.closest('.jogo-resultado').remove()">Fechar</button>
-           <button class="btn-jogo btn-tentar" onclick="(function(){var e=this.closest('.jogo-resultado');e.remove();Jogos.jogar(Jogos.ultimoPlaneta,Jogos.ultimoContainer);})(this)">🔄 Tentar Novamente</button>`}
+          ${venceu ? `<button class="btn-jogo btn-continuar-jogo">Continuar</button>` :
+          `<button class="btn-jogo btn-fechar-jogo">Fechar</button>
+           <button class="btn-jogo btn-tentar" id="btn-tentar-novamente">🔄 Tentar Novamente</button>`}
         </div>
       </div>
     `;
     container.appendChild(overlay);
+
+    overlay.querySelector('.btn-continuar-jogo')?.addEventListener('click', () => { overlay.remove(); });
+    overlay.querySelector('.btn-fechar-jogo')?.addEventListener('click', () => { overlay.remove(); });
+    overlay.querySelector('#btn-tentar-novamente')?.addEventListener('click', () => {
+      overlay.remove();
+      this.jogar(this.ultimoPlaneta, this.ultimoContainer);
+    });
+
     this.pararJogo();
     if (typeof this._onResultado === 'function') {
       this._onResultado(venceu);

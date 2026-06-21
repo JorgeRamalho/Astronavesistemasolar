@@ -744,24 +744,6 @@ body {
   cursor: default;
 }
 
-.rover {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  font-size: 32px;
-  z-index: 20;
-  transform: translate(-50%, -50%);
-  transition: none;
-  pointer-events: none;
-  filter: drop-shadow(0 0 10px rgba(68, 136, 255, 0.8));
-  animation: roverBrilho 1.5s ease-in-out infinite;
-}
-
-@keyframes roverBrilho {
-  0%, 100% { filter: drop-shadow(0 0 10px rgba(68, 136, 255, 0.8)); }
-  50% { filter: drop-shadow(0 0 20px rgba(68, 136, 255, 1)); }
-}
-
 .corpo-celeste {
   cursor: pointer;
   transition: all 0.3s ease;
@@ -2018,10 +2000,6 @@ body {
   .orbita-container, .exploracao-wrapper {
     height: 500px;
     max-width: 500px;
-  }
-
-  .rover {
-    font-size: 24px;
   }
 
   .exploracao-painel-conteudo {
