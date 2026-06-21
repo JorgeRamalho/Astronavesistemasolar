@@ -3,6 +3,8 @@ const Jogos = {
   animacaoId: null,
   teclasPressionadas: {},
   _onResultado: null,
+  ultimoPlaneta: null,
+  ultimoContainer: null,
   canvasW: 400,
   canvasH: 500,
 
@@ -22,6 +24,8 @@ const Jogos = {
 
   async jogar(planeta, container) {
     this.pararJogo();
+    this.ultimoPlaneta = planeta;
+    this.ultimoContainer = container;
     container.innerHTML = '';
     container.style.display = 'block';
     const desafio = planeta.desafio;
@@ -65,7 +69,11 @@ const Jogos = {
         <div class="jogo-resultado-emoji">${venceu ? '🎉' : '💫'}</div>
         <h3>${venceu ? 'Missão Cumprida!' : 'Tente Novamente!'}</h3>
         <p>${mensagem}</p>
-        <button class="btn-jogo" onclick="this.closest('.jogo-resultado').remove()">Continuar</button>
+        <div class="jogo-resultado-botoes">
+          ${venceu ? `<button class="btn-jogo" onclick="this.closest('.jogo-resultado').remove()">Continuar</button>` :
+          `<button class="btn-jogo" onclick="this.closest('.jogo-resultado').remove()">Fechar</button>
+           <button class="btn-jogo btn-tentar" onclick="(function(){var e=this.closest('.jogo-resultado');e.remove();Jogos.jogar(Jogos.ultimoPlaneta,Jogos.ultimoContainer);})(this)">🔄 Tentar Novamente</button>`}
+        </div>
       </div>
     `;
     container.appendChild(overlay);

@@ -1000,6 +1000,21 @@ body {
   transform: scale(1.2);
 }
 
+.jogo-resultado-botoes {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.btn-tentar {
+  background: linear-gradient(135deg, #ff8844, #ff4444) !important;
+}
+
+.btn-tentar:hover {
+  box-shadow: 0 0 20px rgba(255,68,68,0.5) !important;
+}
+
 .btn-avancar {
   display: block;
   margin: 20px auto;
