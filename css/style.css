@@ -734,6 +734,34 @@ body {
   justify-content: center;
 }
 
+.exploracao-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 700px;
+  height: 700px;
+  margin: 0 auto;
+  overflow: hidden;
+  cursor: default;
+}
+
+.rover {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 32px;
+  z-index: 20;
+  transform: translate(-50%, -50%);
+  transition: none;
+  pointer-events: none;
+  filter: drop-shadow(0 0 10px rgba(68, 136, 255, 0.8));
+  animation: roverBrilho 1.5s ease-in-out infinite;
+}
+
+@keyframes roverBrilho {
+  0%, 100% { filter: drop-shadow(0 0 10px rgba(68, 136, 255, 0.8)); }
+  50% { filter: drop-shadow(0 0 20px rgba(68, 136, 255, 1)); }
+}
+
 .corpo-celeste {
   cursor: pointer;
   transition: all 0.3s ease;
@@ -741,9 +769,98 @@ body {
   position: relative;
 }
 
-.corpo-celeste:hover {
-  transform: scale(1.2);
+.planeta-link:hover {
+  transform: scale(1.4) !important;
+  z-index: 15;
+  filter: brightness(1.3);
+}
+
+.planeta-link.rover-perto {
+  animation: pulsarPlaneta 0.8s ease-in-out infinite;
+}
+
+@keyframes pulsarPlaneta {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.25); filter: brightness(1.4) drop-shadow(0 0 15px currentColor); }
+}
+
+.sol.planeta-link:hover {
+  transform: scale(1.2) !important;
+}
+
+.exploracao-painel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.exploracao-painel.ativo {
+  display: flex;
+}
+
+.exploracao-painel-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+}
+
+.exploracao-painel-conteudo {
+  position: relative;
+  background: linear-gradient(135deg, rgba(20, 20, 50, 0.98), rgba(10, 10, 30, 0.98));
+  border: 1px solid;
+  border-radius: 16px;
+  max-width: 420px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  animation: painelEntrar 0.3s ease;
+}
+
+@keyframes painelEntrar {
+  from { opacity: 0; transform: scale(0.9) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.exploracao-painel-fechar {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: #8899bb;
+  font-size: 22px;
+  cursor: pointer;
   z-index: 10;
+  transition: color 0.2s;
+}
+
+.exploracao-painel-fechar:hover {
+  color: #fff;
+}
+
+.exploracao-painel-topo {
+  text-align: center;
+  padding: 24px 20px 16px;
+}
+
+.exploracao-painel-topo .planeta-arte {
+  margin: 0 auto;
+}
+
+.exploracao-painel-topo h2 {
+  margin-top: 8px;
+  font-size: 24px;
 }
 
 .sol {
@@ -770,7 +887,6 @@ body {
   position: absolute;
   top: -20px;
   left: 50%;
-  transform: translateX(-50%);
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -829,6 +945,59 @@ body {
 .lua-mapa .corpo-nome {
   font-size: 11px;
   margin-top: 2px;
+}
+
+.area-jogo-arcade {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+}
+
+.arcade-canvas {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 100%;
+  height: auto;
+  background: #0a0a1a;
+}
+
+.meteoros-container {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.meteoros-info {
+  display: flex;
+  justify-content: space-around;
+  padding: 8px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.meteoros-area {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.1);
+  overflow: hidden;
+}
+
+.meteoro-item {
+  position: absolute;
+  cursor: pointer;
+  transition: transform 0.1s;
+  user-select: none;
+  z-index: 2;
+}
+
+.meteoro-item:hover {
+  transform: scale(1.2);
 }
 
 .btn-avancar {
@@ -1831,9 +2000,18 @@ body {
     justify-content: center;
   }
 
-  .orbita-container {
+  .orbita-container, .exploracao-wrapper {
     height: 500px;
     max-width: 500px;
+  }
+
+  .rover {
+    font-size: 24px;
+  }
+
+  .exploracao-painel-conteudo {
+    max-width: 340px;
+    max-height: 85vh;
   }
 
 .sol-brilho {

@@ -217,25 +217,99 @@ document.addEventListener('DOMContentLoaded', () => {
 
     criarModoExploracao() {
       const main = document.getElementById('main-container');
+      this.roverX = 0;
+      this.roverY = 0;
+      this.roverTeclas = {};
+      this.roverAnimId = null;
+
       main.innerHTML = `
         <div class="mapa-sistema" id="mapa-sistema">
           <div class="mapa-header">
-            <h2>🚀 MODO EXPLORAÇÃO</h2>
-            <p>Pilote seu foguete e visite qualquer planeta livremente!</p>
+            <h2>🛸 MODO EXPLORAÇÃO</h2>
+            <p>Use WASD ou setas para mover o rover. Passe o mouse nos planetas para ampliar e clique para ver a ficha!</p>
             <button class="btn-voltar-pequeno" id="explorar-voltar">Menu</button>
           </div>
-          <div class="orbita-container" id="orbita-container"></div>
+          <div class="exploracao-wrapper" id="exploracao-wrapper">
+            <div class="orbita-container" id="orbita-container"></div>
+            <div class="rover" id="rover">🛸</div>
+          </div>
+          <div class="exploracao-painel" id="exploracao-painel"></div>
         </div>
         <div class="estrelas-bg"></div>
       `;
 
       this.criarEstrelas();
       this.criarOrbitasExploracao();
+      this.initRoverControles();
 
       document.getElementById('explorar-voltar').addEventListener('click', () => {
+        this.pararRover();
         this.transicao(() => this.criarTelaInicial());
       });
 
+    },
+
+    initRoverControles() {
+      const handleKey = (e) => {
+        this.roverTeclas[e.key] = e.type === 'keydown';
+      };
+      document.addEventListener('keydown', handleKey);
+      document.addEventListener('keyup', handleKey);
+      this.roverListeners = handleKey;
+      this.roverAnimId = requestAnimationFrame(() => this.atualizarRover());
+    },
+
+    pararRover() {
+      if (this.roverAnimId) cancelAnimationFrame(this.roverAnimId);
+      if (this.roverListeners) {
+        document.removeEventListener('keydown', this.roverListeners);
+        document.removeEventListener('keyup', this.roverListeners);
+      }
+    },
+
+    atualizarRover() {
+      const rover = document.getElementById('rover');
+      if (!rover) { this.roverAnimId = null; return; }
+      const teclas = this.roverTeclas;
+      let dx = 0, dy = 0;
+      if (teclas['w'] || teclas['W'] || teclas['ArrowUp']) dy = -3;
+      if (teclas['s'] || teclas['S'] || teclas['ArrowDown']) dy = 3;
+      if (teclas['a'] || teclas['A'] || teclas['ArrowLeft']) dx = -3;
+      if (teclas['d'] || teclas['D'] || teclas['ArrowRight']) dx = 3;
+
+      if (dx || dy) {
+        this.roverX += dx;
+        this.roverY += dy;
+        const max = 280;
+        this.roverX = Math.max(-max, Math.min(max, this.roverX));
+        this.roverY = Math.max(-max, Math.min(max, this.roverY));
+        rover.style.transform = `translate(-50%,-50%) translate(${this.roverX}px,${this.roverY}px)`;
+        if (dx < 0) rover.style.transform += ' scaleX(-1)';
+        else rover.style.transform = rover.style.transform.replace(' scaleX(-1)', '');
+
+        this.verificarProximidadePlanetas();
+      }
+
+      this.roverAnimId = requestAnimationFrame(() => this.atualizarRover());
+    },
+
+    verificarProximidadePlanetas() {
+      const wrapper = document.getElementById('exploracao-wrapper');
+      if (!wrapper) return;
+      const wrapperRect = wrapper.getBoundingClientRect();
+      const roverEl = document.getElementById('rover');
+      if (!roverEl) return;
+      const roverRect = roverEl.getBoundingClientRect();
+      const cx = roverRect.left + roverRect.width / 2 - wrapperRect.left;
+      const cy = roverRect.top + roverRect.height / 2 - wrapperRect.top;
+
+      document.querySelectorAll('.planeta-link').forEach(el => {
+        const elRect = el.getBoundingClientRect();
+        const ex = elRect.left + elRect.width / 2 - wrapperRect.left;
+        const ey = elRect.top + elRect.height / 2 - wrapperRect.top;
+        const dist = Math.sqrt((cx - ex) ** 2 + (cy - ey) ** 2);
+        el.classList.toggle('rover-perto', dist < 80);
+      });
     },
 
     criarOrbitasExploracao() {
@@ -272,9 +346,10 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       const sol = document.createElement('div');
-      sol.className = 'corpo-celeste sol';
+      sol.className = 'corpo-celeste sol planeta-link';
+      sol.dataset.planeta = 'sol';
       sol.innerHTML = `${planetaArte('sol', tamanhos.sol)}<span class="corpo-nome">Sol</span>`;
-      sol.addEventListener('click', () => this.visitarPlanetaExploracao('sol'));
+      sol.addEventListener('click', () => this.mostrarPainelExploracao('sol'));
       container.appendChild(sol);
 
       ordemMapa.forEach(id => {
@@ -290,7 +365,8 @@ document.addEventListener('DOMContentLoaded', () => {
         orbita.style.left = `calc(50% - ${orb.raio}px)`;
 
         const planetaEl = document.createElement('div');
-        planetaEl.className = 'corpo-celeste planeta';
+        planetaEl.className = 'corpo-celeste planeta planeta-link';
+        planetaEl.dataset.planeta = id;
         planetaEl.style.cssText = `position:absolute;top:50%;left:50%;width:${tamanhos[id]}px;height:${tamanhos[id]}px;`;
 
         let html = planetaArte(id, tamanhos[id]);
@@ -304,87 +380,82 @@ document.addEventListener('DOMContentLoaded', () => {
         planetaEl.style.transform = `translate(-50%,-50%) translate(${Math.cos(rad) * orb.raio}px,${Math.sin(rad) * orb.raio}px)`;
 
         planetaEl.addEventListener('click', (e) => {
+          e.stopPropagation();
           if (e.target.closest('[data-planeta="lua"]')) {
-            this.visitarPlanetaExploracao('lua');
+            this.mostrarPainelExploracao('lua');
             return;
           }
-          this.visitarPlanetaExploracao(id);
+          this.mostrarPainelExploracao(id);
         });
         orbita.appendChild(planetaEl);
         container.appendChild(orbita);
       });
     },
 
-    visitarPlanetaExploracao(id) {
-      if (this.estaViajando) return;
-      const planeta = planetas.find(p => p.id === id);
-      if (!planeta) return;
+    mostrarPainelExploracao(id) {
+      const p = planetas.find(pl => pl.id === id);
+      if (!p) return;
+      const painel = document.getElementById('exploracao-painel');
+      if (!painel) return;
 
-      this.planetaAtual = id;
-      this.estaViajando = true;
+      const labels = {
+        diametro: 'Diâmetro', massa: 'Massa', temperatura: 'Temperatura',
+        idade: 'Idade', tipo: 'Tipo', composicao: 'Composição',
+        distanciaSol: 'Distância do Sol', periodoOrbital: 'Período Orbital',
+        distanciaTerra: 'Distância da Terra', descoberta: 'Descoberta'
+      };
 
-      this.transicao(() => {
-        this.mostrarPlanetaSimples(planeta);
-        this.estaViajando = false;
-      });
-    },
-
-    mostrarPlanetaSimples(planeta) {
-      const main = document.getElementById('main-container');
-      main.innerHTML = `
-        <div class="planeta-visao" id="planeta-visao">
-          <div class="planeta-header">
-            <button class="btn-voltar" id="btn-voltar">Voltar</button>
+      painel.innerHTML = `
+        <div class="exploracao-painel-overlay" id="exploracao-painel-fechar"></div>
+        <div class="exploracao-painel-conteudo" style="border-color: ${p.cor}">
+          <button class="exploracao-painel-fechar" id="exploracao-painel-fechar-btn">✕</button>
+          <div class="exploracao-painel-topo" style="background: radial-gradient(circle at center, ${p.cor}22 0%, transparent 70%)">
+            ${planetaArte(p.id, 80)}
+            <h2 style="color:${p.cor}">${p.nome}</h2>
+            <span class="painel-tipo">${p.tipo}</span>
           </div>
-          <div class="planeta-destaque" style="background: radial-gradient(circle at center, ${planeta.cor}33 0%, transparent 70%)">
-            ${planetaArte(planeta.id, 100)}
-            <h2 class="planeta-nome" style="color: ${planeta.cor}">${planeta.nome}</h2>
-            <span class="planeta-tipo">${planeta.tipo}</span>
+          <div class="painel-abas">
+            <button class="painel-aba ativa" data-paba="ficha">📋 Ficha Técnica</button>
+            <button class="painel-aba" data-paba="curiosidades">💡 Curiosidades</button>
           </div>
-          <div class="planeta-conteudo">
-            <div class="planeta-abas">
-              <button class="aba-btn ativa" data-aba="ficha">📋 Ficha Técnica</button>
-              <button class="aba-btn" data-aba="curiosidades">💡 Curiosidades</button>
-            </div>
-            <div class="aba-conteudo ativa" id="aba-ficha">
-              <div class="ficha-tecnica">
-                ${Object.entries(planeta.ficha).map(([key, val]) => {
-                  const labels = {
-                    diametro: 'Diâmetro', massa: 'Massa', temperatura: 'Temperatura',
-                    idade: 'Idade', tipo: 'Tipo', composicao: 'Composição',
-                    distanciaSol: 'Distância do Sol', periodoOrbital: 'Período Orbital',
-                    distanciaTerra: 'Distância da Terra'
-                  };
-                  return `<div class="ficha-item"><span class="ficha-label">${labels[key] || key}</span><span class="ficha-valor">${val}</span></div>`;
-                }).join('')}
+          <div class="painel-corpo">
+            <div class="painel-aba-conteudo ativa" id="paba-ficha">
+              <div class="painel-ficha">
+                ${Object.entries(p.ficha).map(([key, val]) => `
+                  <div class="painel-ficha-item">
+                    <span class="painel-ficha-label">${labels[key] || key}</span>
+                    <span class="painel-ficha-valor">${val}</span>
+                  </div>
+                `).join('')}
               </div>
             </div>
-            <div class="aba-conteudo" id="aba-curiosidades">
-              <ul class="curiosidades-lista">
-                ${planeta.curiosidades.map(c => `<li class="curiosidade-item">💫 ${c}</li>`).join('')}
+            <div class="painel-aba-conteudo" id="paba-curiosidades">
+              <ul class="painel-curiosidades">
+                ${p.curiosidades.map(c => `<li class="painel-curiosidade-item">💫 ${c}</li>`).join('')}
               </ul>
             </div>
           </div>
         </div>
-        <div class="estrelas-bg"></div>
       `;
+      painel.classList.add('ativo');
 
-      this.criarEstrelas();
+      document.getElementById('exploracao-painel-fechar').addEventListener('click', () => this.fecharPainelExploracao());
+      document.getElementById('exploracao-painel-fechar-btn').addEventListener('click', () => this.fecharPainelExploracao());
 
-      document.querySelectorAll('.aba-btn').forEach(btn => {
+      document.querySelectorAll('.painel-aba').forEach(btn => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll('.aba-btn').forEach(b => b.classList.remove('ativa'));
+          document.querySelectorAll('.painel-aba').forEach(b => b.classList.remove('ativa'));
           btn.classList.add('ativa');
-          document.querySelectorAll('.aba-conteudo').forEach(c => c.classList.remove('ativa'));
-          const aba = document.getElementById(`aba-${btn.dataset.aba}`);
+          document.querySelectorAll('.painel-aba-conteudo').forEach(c => c.classList.remove('ativa'));
+          const aba = document.getElementById(`paba-${btn.dataset.paba}`);
           if (aba) aba.classList.add('ativa');
         });
       });
+    },
 
-      document.getElementById('btn-voltar').addEventListener('click', () => {
-        this.transicao(() => this.criarModoExploracao());
-      });
-
+    fecharPainelExploracao() {
+      const painel = document.getElementById('exploracao-painel');
+      if (painel) painel.classList.remove('ativo');
     },
 
     criarModoGaleria() {

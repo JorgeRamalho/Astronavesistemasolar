@@ -37,36 +37,10 @@ const planetas = [
     ],
 
     desafio: {
-      nome: 'Quiz Solar',
-      descricao: 'Responda perguntas sobre o Sol!',
-      tipo: 'quiz',
-      perguntas: [
-        {
-          pergunta: 'Qual é a temperatura da superfície do Sol?',
-          opcoes: ['3.000°C', '5.500°C', '10.000°C', '1.000.000°C'],
-          correta: 1
-        },
-        {
-          pergunta: 'Quanto tempo a luz solar leva para chegar à Terra?',
-          opcoes: ['8 minutos e 20 segundos', '5 minutos', '1 hora', '30 segundos'],
-          correta: 0
-        },
-        {
-          pergunta: 'Qual elemento químico é mais abundante no Sol?',
-          opcoes: ['Hélio', 'Carbono', 'Hidrogênio', 'Oxigênio'],
-          correta: 2
-        },
-        {
-          pergunta: 'O Sol é classificado como que tipo de estrela?',
-          opcoes: ['Gigante Vermelha', 'Anã Amarela', 'Anã Branca', 'Supergigante Azul'],
-          correta: 1
-        },
-        {
-          pergunta: 'Quantas Terras caberiam dentro do Sol?',
-          opcoes: ['130 mil', '13 mil', '1,3 milhão', '130 milhões'],
-          correta: 2
-        }
-      ]
+      nome: 'Erupções Solares',
+      descricao: 'Desvie das erupções solares! Use WASD para mover a nave.',
+      tipo: 'solarFlare',
+      duracao: 20
     }
   },
   {
@@ -91,11 +65,10 @@ const planetas = [
       'Mercúrio não tem atmosfera, por isso as temperaturas variam drasticamente.'
     ],
     desafio: {
-      nome: 'Velocidade de Mercúrio',
-      descricao: 'Mercúrio é o planeta mais rápido! Clique o máximo de vezes que conseguir em 10 segundos.',
-      tipo: 'clickRace',
-      duracao: 10,
-      meta: 30
+      nome: 'Corrida de Mercúrio',
+      descricao: 'Mercúrio é o mais rápido! Desvie dos obstáculos em alta velocidade. Use ↑↓ para trocar de faixa.',
+      tipo: 'mercuryDash',
+      duracao: 25
     }
   },
   {
@@ -120,17 +93,10 @@ const planetas = [
       'Vênus é frequentemente chamado de "irmã gêmea" da Terra por ter tamanho similar.'
     ],
     desafio: {
-      nome: 'Ordenação de Temperaturas',
-      descricao: 'Organize os planetas do mais frio ao mais quente!',
-      tipo: 'ordenacao',
-      itens: [
-        { nome: 'Netuno', valor: -200 },
-        { nome: 'Urano', valor: -195 },
-        { nome: 'Marte', valor: -65 },
-        { nome: 'Terra', valor: 15 },
-        { nome: 'Mercúrio', valor: 167 },
-        { nome: 'Vênus', valor: 462 }
-      ]
+      nome: 'Fuga de Vênus',
+      descricao: 'Escale pelas plataformas escaldantes de Vênus! Use WASD para pular entre plataformas.',
+      tipo: 'venusEscape',
+      duracao: 30
     }
   },
   {
@@ -269,16 +235,10 @@ const planetas = [
       'Os anéis de Saturno têm apenas cerca de 10 metros de espessura, mas se estendem por 282.000 km.'
     ],
     desafio: {
-      nome: 'Monte os Anéis de Saturno',
-      descricao: 'Arraste as partículas de gelo para montar os anéis de Saturno na ordem correta (da maior para a menor)!',
-      tipo: 'montarAneis',
-      itens: [
-        { nome: 'Anel A', tamanho: 10 },
-        { nome: 'Anel B', tamanho: 15 },
-        { nome: 'Anel C', tamanho: 5 },
-        { nome: 'Anel D', tamanho: 3 },
-        { nome: 'Anel F', tamanho: 1 }
-      ]
+      nome: 'Anéis de Saturno',
+      descricao: 'Colete os anéis de Saturno desviando dos asteroides! Use ← → para mover.',
+      tipo: 'ringCollector',
+      duracao: 25
     }
   },
   {
@@ -303,11 +263,10 @@ const planetas = [
       'Uma estação em Urano dura cerca de 21 anos terrestres.'
     ],
     desafio: {
-      nome: 'Inclinação de Urano',
-      descricao: 'Ajude Urano a se inclinar corretamente! Clique no botão no momento certo para parar a rotação no ângulo de 98 graus.',
-      tipo: 'inclinacao',
-      alvo: 98,
-      tolerancia: 5
+      nome: 'Gelo de Urano',
+      descricao: 'Colete cristais de gelo desviando dos detritos! Use WASD para mover.',
+      tipo: 'uranoIce',
+      duracao: 20
     }
   },
   {
@@ -332,36 +291,10 @@ const planetas = [
       'A sonda New Horizons visitou Plutão em 2015, revelando sua superfície incrível.'
     ],
     desafio: {
-      nome: 'Quiz Plutão',
-      descricao: 'Teste seus conhecimentos sobre este planeta anão!',
-      tipo: 'quiz',
-      perguntas: [
-        {
-          pergunta: 'Em que ano Plutão foi reclassificado como planeta anão?',
-          opcoes: ['2000', '2006', '2010', '2015'],
-          correta: 1
-        },
-        {
-          pergunta: 'Quantas luas Plutão possui conhecidas?',
-          opcoes: ['1', '3', '5', '7'],
-          correta: 2
-        },
-        {
-          pergunta: 'Qual é a temperatura média em Plutão?',
-          opcoes: ['-100°C', '-170°C', '-230°C', '-50°C'],
-          correta: 2
-        },
-        {
-          pergunta: 'Qual sonda visitou Plutão em 2015?',
-          opcoes: ['Voyager 1', 'Cassini', 'New Horizons', 'Hubble'],
-          correta: 2
-        },
-        {
-          pergunta: 'Qual é o maior satélite de Plutão?',
-          opcoes: ['Nix', 'Caronte', 'Hidra', 'Cérbero'],
-          correta: 1
-        }
-      ]
+      nome: 'Minerador de Plutão',
+      descricao: 'Mineire cristais de gelo em Plutão! Use WASD para se mover e colete os cristais.',
+      tipo: 'plutoMiner',
+      duracao: 25
     }
   },
   {
