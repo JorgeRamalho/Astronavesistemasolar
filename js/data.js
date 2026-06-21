@@ -35,7 +35,7 @@ const planetas = [
       'A luz do Sol leva cerca de 8 minutos e 20 segundos para chegar à Terra.',
       'O Sol é tão grande que caberiam 1,3 milhões de Terras dentro dele.'
     ],
-    narracaoChegada: 'Atenção, viajante! Chegamos ao centro do nosso Sistema Solar: o Sol! Esta enorme estrela é a fonte de toda a energia que mantém nossos planetas em movimento. Mas cuidado: estamos a uma distância segura de observação!',
+
     desafio: {
       nome: 'Quiz Solar',
       descricao: 'Responda perguntas sobre o Sol!',
@@ -90,7 +90,6 @@ const planetas = [
       'Um dia em Mercúrio (176 dias terrestres) é mais longo que seu ano (88 dias).',
       'Mercúrio não tem atmosfera, por isso as temperaturas variam drasticamente.'
     ],
-    narracaoChegada: 'Atenção! Estamos nos aproximando de Mercúrio, o menor e mais rápido planeta do Sistema Solar! Ele completa uma volta ao redor do Sol em apenas 88 dias. Prepare-se para sentir a variação extrema de temperatura!',
     desafio: {
       nome: 'Velocidade de Mercúrio',
       descricao: 'Mercúrio é o planeta mais rápido! Clique o máximo de vezes que conseguir em 10 segundos.',
@@ -120,7 +119,6 @@ const planetas = [
       'Em Vênus, o Sol nasce no oeste e se põe no leste (rotação retrógrada).',
       'Vênus é frequentemente chamado de "irmã gêmea" da Terra por ter tamanho similar.'
     ],
-    narracaoChegada: 'Bem-vindos a Vênus, o planeta mais quente do Sistema Solar! Sua atmosfera espessa de dióxido de carbono cria um efeito estufa devastador. Dizem que é o planeta mais parecido com a Terra em tamanho, mas com condições totalmente diferentes!',
     desafio: {
       nome: 'Ordenação de Temperaturas',
       descricao: 'Organize os planetas do mais frio ao mais quente!',
@@ -156,38 +154,11 @@ const planetas = [
       'Cerca de 71% da superfície da Terra é coberta por água.',
       'A atmosfera terrestre nos protege da radiação solar e de meteoros.'
     ],
-    narracaoChegada: 'Ah, nosso lar! A Terra, o terceiro planeta do Sistema Solar. O único lugar que conhecemos com vida, oceanos líquidos e uma atmosfera que nos protege. Vamos explorar este incrível planeta azul antes de visitar sua companheira fiel: a Lua!',
     desafio: {
-      nome: 'Quiz Terra & Lua',
-      descricao: 'Teste seus conhecimentos sobre a Terra e sua Lua!',
-      tipo: 'quiz',
-      perguntas: [
-        {
-          pergunta: 'Qual porcentagem da superfície da Terra é coberta por água?',
-          opcoes: ['50%', '61%', '71%', '81%'],
-          correta: 2
-        },
-        {
-          pergunta: 'Quanto tempo a Lua leva para orbitar a Terra?',
-          opcoes: ['Aprox. 27 dias', 'Aprox. 30 dias', 'Aprox. 15 dias', 'Aprox. 365 dias'],
-          correta: 0
-        },
-        {
-          pergunta: 'O que causa as marés na Terra?',
-          opcoes: ['O vento', 'A gravidade da Lua', 'O calor do Sol', 'A rotação da Terra'],
-          correta: 1
-        },
-        {
-          pergunta: 'Qual foi o ano da primeira missão tripulada à Lua?',
-          opcoes: ['1965', '1969', '1972', '1961'],
-          correta: 1
-        },
-        {
-          pergunta: 'A Lua está se afastando da Terra a que taxa?',
-          opcoes: ['1 cm por ano', '3,8 cm por ano', '10 cm por ano', '1 metro por ano'],
-          correta: 1
-        }
-      ]
+      nome: 'Desvio de Meteoros',
+      descricao: 'Desvie dos meteoros e cometas por 1 minuto! Use as setas ← → para mover a nave.',
+      tipo: 'desvioMeteoros',
+      duracao: 60
     }
   },
   {
@@ -211,7 +182,6 @@ const planetas = [
       'A gravidade na Lua é cerca de 1/6 da gravidade da Terra.',
       'A Lua está se afastando da Terra cerca de 3,8 cm por ano.'
     ],
-    narracaoChegada: 'Aqui está ela: a Lua, nossa vizinha mais próxima! O único corpo celeste fora da Terra que os seres humanos já pisaram. Apesar de parecer pequena no céu, a Lua tem um papel fundamental nas marés e na estabilidade do eixo da Terra!',
     desafio: {
       nome: 'Pouso Lunar',
       descricao: 'Pouse a nave na Lua! Use as setas ← → para controlar e ↓ para descer mais rápido.',
@@ -241,7 +211,6 @@ const planetas = [
       'O Monte Olimpo em Marte é o maior vulcão do Sistema Solar, com 21,9 km de altura.',
       'Marte tem estações do ano como a Terra, mas cada estação dura cerca de 6 meses.'
     ],
-    narracaoChegada: 'Chegamos a Marte, o Planeta Vermelho! Com suas paisagens desérticas e o maior vulcão do Sistema Solar, Marte é o próximo grande destino da exploração espacial humana. Será que um dia viveremos aqui?',
     desafio: {
       nome: 'Caça aos Meteoros',
       descricao: 'Clique nos meteoros para coletá-los antes que caiam em Marte! Você tem 20 segundos.',
@@ -271,7 +240,6 @@ const planetas = [
       'A Grande Mancha Vermelha é uma tempestade maior que a Terra que dura há centenas de anos.',
       'Júpiter tem pelo menos 95 luas conhecidas!'
     ],
-    narracaoChegada: 'Atenção, tripulação! Estamos nos aproximando de Júpiter, o gigante do Sistema Solar! Sua massa é maior que a soma de todos os outros planetas combinados. Observe a Grande Mancha Vermelha: uma tempestade colossal que dura séculos!',
     desafio: {
       nome: 'Tempestade em Júpiter',
       descricao: 'Desvie sua nave das tempestades na Grande Mancha Vermelha! Use as setas ← → para mover.',
@@ -300,7 +268,6 @@ const planetas = [
       'Saturno é tão leve que flutuaria na água (se houvesse um oceano grande o suficiente).',
       'Os anéis de Saturno têm apenas cerca de 10 metros de espessura, mas se estendem por 282.000 km.'
     ],
-    narracaoChegada: 'Que vista magnífica! Saturno, o senhor dos anéis! Seu sistema de anéis é um dos espetáculos mais bonitos do cosmos. Apesar de ser um gigante gasoso, Saturno tem uma densidade tão baixa que flutuaria na água!',
     desafio: {
       nome: 'Monte os Anéis de Saturno',
       descricao: 'Arraste as partículas de gelo para montar os anéis de Saturno na ordem correta (da maior para a menor)!',
@@ -335,7 +302,6 @@ const planetas = [
       'Urano foi o primeiro planeta descoberto com um telescópio (1781).',
       'Uma estação em Urano dura cerca de 21 anos terrestres.'
     ],
-    narracaoChegada: 'Bem-vindos a Urano, o planeta que gira deitado! Com uma inclinação de 98 graus, Urano parece "rolar" pelo espaço. Sua cor azulada vem do metano em sua atmosfera. Um mundo gelado e misterioso nos espera!',
     desafio: {
       nome: 'Inclinação de Urano',
       descricao: 'Ajude Urano a se inclinar corretamente! Clique no botão no momento certo para parar a rotação no ângulo de 98 graus.',
@@ -365,7 +331,6 @@ const planetas = [
       'Plutão tem 5 luas conhecidas: Caronte, Estige, Nix, Cérbero e Hidra.',
       'A sonda New Horizons visitou Plutão em 2015, revelando sua superfície incrível.'
     ],
-    narracaoChegada: 'Chegamos a Plutão! Este pequeno mundo gelado já foi o nono planeta do Sistema Solar. Reclassificado como planeta anão em 2006, Plutão continua sendo um lugar fascinante com suas montanhas de gelo e atmosfera tênue. A sonda New Horizons nos mostrou um mundo mais complexo do que imaginávamos!',
     desafio: {
       nome: 'Quiz Plutão',
       descricao: 'Teste seus conhecimentos sobre este planeta anão!',
@@ -420,7 +385,6 @@ const planetas = [
       'Netuno foi o primeiro planeta descoberto através de cálculos matemáticos.',
       'Um ano em Netuno dura 164,8 anos terrestres.'
     ],
-    narracaoChegada: 'Última parada! Netuno, o planeta mais distante do Sistema Solar! Com ventos que ultrapassam 2.000 km/h, este gigante gelado é um mundo de extremos. Sua bela cor azul intensa é hipnotizante. Prepare-se para sentir a força dos ventos!',
     desafio: {
       nome: 'Fuja dos Ventos de Netuno',
       descricao: 'Desvie dos ventos supersônicos de Netuno! As rajadas vêm de direções aleatórias. Use WASD para mover a nave.',
@@ -449,7 +413,6 @@ const planetas = [
       'Sua última passagem pelo Sistema Solar interno foi em 1986, e a próxima será em 2061.',
       'O núcleo do Halley tem formato irregular, parecido com um amendoim de 15 km de comprimento.'
     ],
-    narracaoChegada: 'O lendário Cometa Halley! Visitante ilustre do Sistema Solar, visível da Terra a cada 75 anos! Sua cauda brilhante se estende por milhões de quilômetros quando se aproxima do Sol!'
   },
   {
     id: 'halebopp',
@@ -472,6 +435,5 @@ const planetas = [
       'Seu núcleo gigante de até 40 km o tornou excepcionalmente brilhante.',
       'Descoberto simultaneamente por Alan Hale e Thomas Bopp nos Estados Unidos.'
     ],
-    narracaoChegada: 'Cometa Hale-Bopp! Um dos mais espetaculares cometas da história moderna! Com seu brilho intenso e cauda dupla, foi um verdadeiro show no céu em 1997!'
   }
 ];

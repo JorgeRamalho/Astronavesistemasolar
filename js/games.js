@@ -48,6 +48,7 @@ const Jogos = {
       case 'montarAneis': this.jogoMontarAneis(desafio, areaJogo, container); break;
       case 'inclinacao': this.jogoInclinacao(desafio, areaJogo, container); break;
       case 'fugaVentos': this.jogoFugaVentos(desafio, areaJogo, container); break;
+      case 'desvioMeteoros': this.jogoDesvioMeteoros(desafio, areaJogo, container); break;
       default: areaJogo.innerHTML = '<p>Jogo em desenvolvimento...</p>';
     }
   },
@@ -848,6 +849,162 @@ const Jogos = {
       if (tempoRestante <= 0) {
         ativo = false;
         this.finalizarJogo(container, true, 'Você sobreviveu aos ventos supersônicos de Netuno! Parabéns!');
+        return;
+      }
+
+      tempoRestante -= 1 / 60;
+      this.animacaoId = requestAnimationFrame(loop);
+    };
+    loop();
+  },
+
+  jogoDesvioMeteoros(desafio, area, container) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 400;
+    canvas.height = 500;
+    canvas.className = 'meteoros-canvas';
+    area.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+
+    let naveX = 200, naveY = 430;
+    let tempoRestante = desafio.duracao;
+    let obstaculos = [];
+    let ativo = true;
+    let frame = 0;
+
+    const loop = () => {
+      if (!ativo) return;
+      frame++;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#0a0a1a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < 60; i++) {
+        ctx.fillStyle = `rgba(255,255,255,${0.2 + Math.random() * 0.5})`;
+        ctx.beginPath();
+        ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = '#1a3a5c';
+      ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
+      ctx.fillStyle = '#2a5a8c';
+      for (let i = 0; i < canvas.width; i += 30) {
+        ctx.beginPath();
+        ctx.arc(i + 5, canvas.height - 15, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      if (frame % Math.max(15, 45 - Math.floor(tempoRestante / 2)) === 0) {
+        const tipo = Math.random() < 0.3 ? 'cometa' : 'meteoro';
+        obstaculos.push({
+          x: 20 + Math.random() * (canvas.width - 40),
+          y: -30,
+          vy: 1.5 + Math.random() * (2.5 + (60 - tempoRestante) / 20),
+          vx: (Math.random() - 0.5) * 1.5,
+          tamanho: tipo === 'cometa' ? 18 + Math.random() * 12 : 10 + Math.random() * 15,
+          tipo: tipo
+        });
+      }
+
+      obstaculos = obstaculos.filter(o => {
+        o.x += o.vx;
+        o.y += o.vy;
+
+        if (o.tipo === 'meteoro') {
+          const grad = ctx.createRadialGradient(o.x, o.y, 2, o.x, o.y, o.tamanho);
+          grad.addColorStop(0, '#ff8844');
+          grad.addColorStop(0.4, '#aa4422');
+          grad.addColorStop(1, '#441100');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(o.x, o.y, o.tamanho, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = 'rgba(255,136,68,0.3)';
+          ctx.beginPath();
+          ctx.arc(o.x, o.y, o.tamanho * 1.3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#ffaa44';
+          ctx.beginPath();
+          ctx.arc(o.x - o.tamanho * 0.25, o.y - o.tamanho * 0.25, o.tamanho * 0.35, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          const grad = ctx.createRadialGradient(o.x, o.y, 2, o.x, o.y, o.tamanho);
+          grad.addColorStop(0, '#ffffff');
+          grad.addColorStop(0.3, '#aaddff');
+          grad.addColorStop(0.7, '#4488cc');
+          grad.addColorStop(1, '#224466');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(o.x, o.y, o.tamanho * 0.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = 'rgba(100,180,255,0.3)';
+          ctx.beginPath();
+          ctx.moveTo(o.x, o.y);
+          ctx.lineTo(o.x - o.tamanho * 1.5, o.y - o.tamanho * 0.3);
+          ctx.lineTo(o.x - o.tamanho * 1.8, o.y + o.tamanho * 0.2);
+          ctx.lineTo(o.x, o.y);
+          ctx.fill();
+          ctx.fillStyle = `rgba(150,200,255,${0.1 + Math.sin(frame / 20) * 0.05})`;
+          ctx.beginPath();
+          ctx.moveTo(o.x, o.y);
+          ctx.lineTo(o.x - o.tamanho * 2.5, o.y + o.tamanho * 0.5);
+          ctx.lineTo(o.x - o.tamanho * 2.8, o.y + o.tamanho * 0.8);
+          ctx.lineTo(o.x, o.y);
+          ctx.fill();
+        }
+
+        return o.y < canvas.height + 40;
+      });
+
+      if (this.teclasPressionadas['ArrowLeft']) naveX -= 4;
+      if (this.teclasPressionadas['ArrowRight']) naveX += 4;
+      naveX = Math.max(18, Math.min(canvas.width - 18, naveX));
+
+      const colisao = obstaculos.some(o => {
+        const dx = naveX - o.x;
+        const dy = naveY - o.y;
+        const raio = o.tipo === 'cometa' ? o.tamanho * 0.5 : o.tamanho;
+        return Math.sqrt(dx * dx + dy * dy) < raio + 14;
+      });
+
+      if (colisao) {
+        ativo = false;
+        this.finalizarJogo(container, false, 'Sua nave foi atingida! Tente novamente, piloto!');
+        return;
+      }
+
+      ctx.fillStyle = '#4488ff';
+      ctx.beginPath();
+      ctx.moveTo(naveX, naveY - 18);
+      ctx.lineTo(naveX - 12, naveY + 6);
+      ctx.lineTo(naveX + 12, naveY + 6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#88ccff';
+      ctx.beginPath();
+      ctx.moveTo(naveX, naveY - 10);
+      ctx.lineTo(naveX - 6, naveY + 3);
+      ctx.lineTo(naveX + 6, naveY + 3);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#ff4444';
+      ctx.font = 'bold 14px monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText(`⏱ ${Math.ceil(tempoRestante)}s`, 10, 25);
+      ctx.fillText(`☄️ ${obstaculos.length}`, 10, 45);
+
+      ctx.fillStyle = '#8899bb';
+      ctx.font = '12px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('← → para desviar', canvas.width / 2, canvas.height - 5);
+
+      if (tempoRestante <= 0) {
+        ativo = false;
+        this.finalizarJogo(container, true, 'Sobreviveu ao cinturão de meteoros! Rumo à Lua! 🚀');
         return;
       }
 

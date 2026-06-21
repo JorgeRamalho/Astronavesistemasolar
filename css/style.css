@@ -200,21 +200,43 @@ body {
 }
 
 .btn-voltar-pequeno {
-  padding: 6px 16px;
-  font-size: 12px;
+  padding: 8px 20px;
+  font-size: 13px;
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 20px;
-  color: #8899bb;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 25px;
+  color: #aabbdd;
   cursor: pointer;
   transition: all 0.3s ease;
   margin-top: 8px;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(4px);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-voltar-pequeno::before {
+  content: '←';
+  display: inline-block;
+  margin-right: 6px;
+  transition: transform 0.3s ease;
 }
 
 .btn-voltar-pequeno:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(253, 184, 19, 0.3);
+  color: #FDB813;
+  box-shadow: 0 0 20px rgba(253, 184, 19, 0.15);
+  transform: translateX(-3px);
+}
+
+.btn-voltar-pequeno:hover::before {
+  transform: translateX(-4px);
+}
+
+.btn-voltar-pequeno:active {
+  transform: translateX(0) scale(0.97);
 }
 
 .btn-iniciar {
@@ -736,7 +758,7 @@ body {
   position: absolute;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 50%;
-  animation: rotacao 30s linear infinite;
+  animation: rotacao linear infinite;
 }
 
 @keyframes rotacao {
@@ -856,20 +878,44 @@ body {
 }
 
 .btn-voltar {
-  padding: 10px 24px;
-  font-size: 14px;
+  padding: 12px 28px;
+  font-size: 15px;
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 30px;
   color: #aabbdd;
   cursor: pointer;
   transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(4px);
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-voltar::before {
+  content: '←';
+  font-size: 16px;
+  transition: transform 0.3s ease;
 }
 
 .btn-voltar:hover {
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(253, 184, 19, 0.35);
+  color: #FDB813;
+  box-shadow: 0 0 25px rgba(253, 184, 19, 0.2);
+  transform: translateX(-4px);
+}
+
+.btn-voltar:hover::before {
+  transform: translateX(-5px);
+}
+
+.btn-voltar:active {
+  transform: translateX(0) scale(0.97);
 }
 
 .planeta-navegacao {
@@ -1209,7 +1255,7 @@ body {
   font-size: 13px;
 }
 
-.pouso-canvas, .tempestade-canvas, .ventos-canvas, .inclinacao-canvas {
+.pouso-canvas, .tempestade-canvas, .ventos-canvas, .inclinacao-canvas, .meteoros-canvas {
   display: block;
   margin: 0 auto;
   border-radius: 12px;
@@ -1381,27 +1427,7 @@ body {
   font-size: 15px;
 }
 
-#narrador {
-  position: fixed;
-  bottom: -200px;
-  left: 50%;
-  transform: translateX(-50%);
-  max-width: 700px;
-  width: 90%;
-  background: linear-gradient(135deg, rgba(20, 20, 50, 0.95), rgba(10, 10, 30, 0.95));
-  border: 1px solid rgba(253, 184, 19, 0.3);
-  border-radius: 16px;
-  padding: 16px 20px;
-  z-index: 100;
-  transition: bottom 0.5s ease;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.btn-voz, .btn-som {
+.btn-som {
   background: none;
   border: 1px solid rgba(253, 184, 19, 0.2);
   border-radius: 8px;
@@ -1413,78 +1439,16 @@ body {
   line-height: 1;
 }
 
-.btn-voz:hover, .btn-som:hover {
+.btn-som:hover {
   background: rgba(253, 184, 19, 0.1);
   border-color: rgba(253, 184, 19, 0.5);
 }
 
-#narrador.ativo {
-  bottom: 20px;
-}
-
-.narrador-avatar {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.narrador-icon {
-  font-size: 32px;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.narrador-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.narrador-nome {
-  font-size: 12px;
-  color: #FDB813;
-  font-weight: 700;
-  letter-spacing: 1px;
-  margin-bottom: 4px;
-}
-
-.narrador-texto {
-  font-size: 14px;
-  color: #ccd;
-  line-height: 1.5;
-  min-height: 20px;
-}
-
-.narrador-texto::after {
-  content: '|';
-  animation: cursorPisca 0.8s step-end infinite;
-  color: #FDB813;
-}
-
-@keyframes cursorPisca {
-  50% { opacity: 0; }
-}
-
-.narrador-bolha-rapida {
+#btn-som-container {
   position: fixed;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(253, 184, 19, 0.15);
-  border: 1px solid rgba(253, 184, 19, 0.3);
-  padding: 10px 24px;
-  border-radius: 12px;
-  font-size: 14px;
-  color: #FDB813;
-  z-index: 99;
-  animation: bolhaSobe 3s ease forwards;
-  white-space: nowrap;
-}
-
-@keyframes bolhaSobe {
-  0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
-  15% { opacity: 1; transform: translateX(-50%) translateY(0); }
-  85% { opacity: 1; transform: translateX(-50%) translateY(0); }
-  100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+  bottom: 20px;
+  right: 20px;
+  z-index: 100;
 }
 
 .planeta-arte {
@@ -1749,43 +1713,59 @@ body {
 
 /* HALLEY */
 .pa-halley {
-  background: radial-gradient(circle at 40% 35%, #C8E8F8, #8CC4E8 30%, #5BA0C8 60%, #3A7A9E);
-  box-shadow: 0 0 15px rgba(140,196,232,0.4);
+  background: radial-gradient(circle at 45% 40%, #FFFFFF 5%, #D0ECFA 15%, #8CC4E8 35%, #5BA0C8 60%, #3A7A9E);
+  box-shadow: 0 0 20px rgba(140,196,232,0.5), 0 0 40px rgba(200,232,248,0.2);
+  animation: cometaBrilho 4s ease-in-out infinite;
+}
+@keyframes cometaBrilho {
+  0%, 100% { box-shadow: 0 0 20px rgba(140,196,232,0.5), 0 0 40px rgba(200,232,248,0.2); }
+  50% { box-shadow: 0 0 30px rgba(140,196,232,0.7), 0 0 60px rgba(200,232,248,0.35); }
 }
 .pa-halley::before {
   content: '';
   position: absolute;
-  width: 200%; height: 20%;
-  top: 40%; left: -100%;
-  background: linear-gradient(90deg, transparent, rgba(200,232,248,0.15), rgba(200,232,248,0.3));
+  width: 300%; height: 16%;
+  top: 42%; left: -200%;
+  background: linear-gradient(90deg, transparent 10%, rgba(200,232,248,0.06) 30%, rgba(200,232,248,0.2) 55%, rgba(200,232,248,0.35) 75%, rgba(200,232,248,0.08));
   border-radius: 50%;
-  transform: rotate(-15deg);
+  transform: rotate(-10deg);
+  pointer-events: none;
+}
+.pa-halley::after {
+  content: '';
+  position: absolute;
+  width: 220%; height: 8%;
+  top: 48%; left: -120%;
+  background: linear-gradient(90deg, transparent 20%, rgba(100,180,255,0.05) 45%, rgba(100,180,255,0.12) 70%, transparent);
+  border-radius: 50%;
+  transform: rotate(-5deg);
   pointer-events: none;
 }
 
 /* HALE-BOPP */
 .pa-halebopp {
-  background: radial-gradient(circle at 35% 30%, #E0F0FF, #A8D8F0 30%, #6BB0D8 60%, #4A8EB8);
-  box-shadow: 0 0 20px rgba(168,216,240,0.4);
+  background: radial-gradient(circle at 40% 35%, #FFFFFF 5%, #E8F4FF 15%, #A8D8F0 35%, #6BB0D8 60%, #4A8EB8);
+  box-shadow: 0 0 25px rgba(168,216,240,0.6), 0 0 50px rgba(224,240,255,0.2);
+  animation: cometaBrilho 6s ease-in-out infinite;
 }
 .pa-halebopp::before {
   content: '';
   position: absolute;
-  width: 220%; height: 18%;
-  top: 42%; left: -120%;
-  background: linear-gradient(90deg, transparent, rgba(224,240,255,0.12), rgba(224,240,255,0.25));
+  width: 320%; height: 18%;
+  top: 41%; left: -220%;
+  background: linear-gradient(90deg, transparent 15%, rgba(224,240,255,0.08) 35%, rgba(200,230,255,0.25) 55%, rgba(180,220,255,0.4) 70%, rgba(160,210,255,0.1));
   border-radius: 50%;
-  transform: rotate(-10deg);
+  transform: rotate(-8deg);
   pointer-events: none;
 }
 .pa-halebopp::after {
   content: '';
   position: absolute;
-  width: 180%; height: 12%;
-  top: 35%; left: -80%;
-  background: linear-gradient(90deg, transparent, rgba(200,230,255,0.08), rgba(200,230,255,0.15));
+  width: 280%; height: 9%;
+  top: 34%; left: -180%;
+  background: linear-gradient(90deg, transparent 20%, rgba(120,180,255,0.04) 45%, rgba(100,160,255,0.12) 65%, rgba(80,140,255,0.06));
   border-radius: 50%;
-  transform: rotate(5deg);
+  transform: rotate(-20deg);
   pointer-events: none;
 }
 
@@ -1856,11 +1836,6 @@ body {
     max-width: 500px;
   }
 
-  .sol {
-    width: 70px;
-    height: 70px;
-  }
-
 .sol-brilho {
   position: absolute;
   width: 120px;
@@ -1881,11 +1856,6 @@ body {
   z-index: 1;
 }
 
-.orbita {
-    width: 80px !important;
-    height: 80px !important;
-  }
-
   .mapa-header h2 {
     font-size: 20px;
   }
@@ -1894,19 +1864,6 @@ body {
     width: 180px;
     height: 180px;
     font-size: 20px;
-  }
-
-  #narrador {
-    width: 95%;
-    padding: 12px 16px;
-  }
-
-  #narrador.ativo {
-    bottom: 10px;
-  }
-
-  .narrador-texto {
-    font-size: 13px;
   }
 
   .clickRace-info {

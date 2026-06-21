@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     jornadaCompletos: [],
 
     init() {
-      Narrador.init();
       Jogos.init();
       this.carregarProgresso();
       this.criarTelaInicial();
@@ -17,10 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     initControlesAudio() {
-      document.getElementById('btn-voz').addEventListener('click', () => {
-        const ativa = Narrador.alternarVoz();
-        document.getElementById('btn-voz').textContent = ativa ? '🔊' : '🔇';
-      });
       document.getElementById('btn-som').addEventListener('click', () => {
         const ativa = AudioEspaco.alternar();
         document.getElementById('btn-som').textContent = ativa ? '🎵' : '🔇';
@@ -141,7 +136,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
 
-      Narrador.falar('Olá, viajante! Escolha seu modo de jogo: Aventura para seguir a rota completa, Exploração para visitar livremente, ou Galeria para conhecer todos os planetas!');
     },
 
     criarRotaAventura() {
@@ -155,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="rota-header">
             <h2>🚀 ROTA DA AVENTURA</h2>
             <p>Sua jornada pelo Sistema Solar</p>
-            <button class="btn-voltar-pequeno" id="rota-voltar-menu">← Menu</button>
+            <button class="btn-voltar-pequeno" id="rota-voltar-menu">Menu</button>
           </div>
           <div class="rota-progresso">
             <span>Parada ${destinoIdx + 1} de ${this.jornadaOrdem.length}</span>
@@ -182,7 +176,6 @@ document.addEventListener('DOMContentLoaded', () => {
         this.transicao(() => this.criarTelaInicial());
       });
 
-      Narrador.falar(`Próxima parada: ${planeta.nome}! Complete o desafio para avançar na jornada!`);
     },
 
     criarListaRota() {
@@ -229,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="mapa-header">
             <h2>🚀 MODO EXPLORAÇÃO</h2>
             <p>Pilote seu foguete e visite qualquer planeta livremente!</p>
-            <button class="btn-voltar-pequeno" id="explorar-voltar">← Menu</button>
+            <button class="btn-voltar-pequeno" id="explorar-voltar">Menu</button>
           </div>
           <div class="orbita-container" id="orbita-container"></div>
         </div>
@@ -243,7 +236,6 @@ document.addEventListener('DOMContentLoaded', () => {
         this.transicao(() => this.criarTelaInicial());
       });
 
-      Narrador.falar('Modo Exploração! Escolha qualquer planeta para visitar. Sem desafios obrigatórios!');
     },
 
     criarOrbitasExploracao() {
@@ -251,10 +243,32 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!container) return;
       container.innerHTML = '';
 
+      const isMobile = window.innerWidth <= 768;
+      const escala = isMobile ? 0.6 : 1.0;
+
       const ordemMapa = ['mercurio','venus','terra','marte','jupiter','saturno','urano','netuno','plutao'];
       const tamanhos = {
-        sol: 100, mercurio: 24, venus: 30, terra: 32, marte: 26,
-        jupiter: 48, saturno: 42, urano: 30, netuno: 30, plutao: 22
+        sol: isMobile ? 70 : 100, mercurio: isMobile ? 20 : 24, venus: isMobile ? 26 : 30,
+        terra: isMobile ? 28 : 32, marte: isMobile ? 22 : 26,
+        jupiter: isMobile ? 40 : 48, saturno: isMobile ? 36 : 42,
+        urano: isMobile ? 26 : 30, netuno: isMobile ? 26 : 30, plutao: isMobile ? 18 : 22
+      };
+
+      const orbitas = {
+        mercurio: { raio: Math.round(95 * escala), duracao: 14 },
+        venus:    { raio: Math.round(130 * escala), duracao: 20 },
+        terra:    { raio: Math.round(165 * escala), duracao: 28 },
+        marte:    { raio: Math.round(195 * escala), duracao: 35 },
+        jupiter:  { raio: Math.round(230 * escala), duracao: 48 },
+        saturno:  { raio: Math.round(260 * escala), duracao: 62 },
+        urano:    { raio: Math.round(290 * escala), duracao: 82 },
+        netuno:   { raio: Math.round(320 * escala), duracao: 102 },
+        plutao:   { raio: Math.round(350 * escala), duracao: 135 }
+      };
+
+      const angulosIniciais = {
+        mercurio: 50, venus: 120, terra: 200, marte: 80,
+        jupiter: 300, saturno: 140, urano: 220, netuno: 10, plutao: 340
       };
 
       const sol = document.createElement('div');
@@ -263,13 +277,17 @@ document.addEventListener('DOMContentLoaded', () => {
       sol.addEventListener('click', () => this.visitarPlanetaExploracao('sol'));
       container.appendChild(sol);
 
-      ordemMapa.forEach((id, idx) => {
+      ordemMapa.forEach(id => {
         const p = planetas.find(pl => pl.id === id);
         if (!p) return;
+        const orb = orbitas[id];
         const orbita = document.createElement('div');
         orbita.className = 'orbita';
-        orbita.style.width = `${180 + idx * 50}px`;
-        orbita.style.height = `${180 + idx * 50}px`;
+        orbita.style.width = `${orb.raio * 2}px`;
+        orbita.style.height = `${orb.raio * 2}px`;
+        orbita.style.animationDuration = `${orb.duracao}s`;
+        orbita.style.top = `calc(50% - ${orb.raio}px)`;
+        orbita.style.left = `calc(50% - ${orb.raio}px)`;
 
         const planetaEl = document.createElement('div');
         planetaEl.className = 'corpo-celeste planeta';
@@ -282,10 +300,8 @@ document.addEventListener('DOMContentLoaded', () => {
         html += `<span class="corpo-nome">${p.nome}</span>`;
         planetaEl.innerHTML = html;
 
-        const angulo = (idx / ordemMapa.length) * 360;
-        const rad = (angulo * Math.PI) / 180;
-        const raio = (180 + idx * 50) / 2;
-        planetaEl.style.transform = `translate(-50%,-50%) translate(${Math.cos(rad) * raio}px,${Math.sin(rad) * raio}px)`;
+        const rad = (angulosIniciais[id] * Math.PI) / 180;
+        planetaEl.style.transform = `translate(-50%,-50%) translate(${Math.cos(rad) * orb.raio}px,${Math.sin(rad) * orb.raio}px)`;
 
         planetaEl.addEventListener('click', (e) => {
           if (e.target.closest('[data-planeta="lua"]')) {
@@ -311,8 +327,6 @@ document.addEventListener('DOMContentLoaded', () => {
         this.mostrarPlanetaSimples(planeta);
         this.estaViajando = false;
       });
-
-      Narrador.falarInstantaneo(`🛸 Viajando para ${planeta.nome}...`);
     },
 
     mostrarPlanetaSimples(planeta) {
@@ -320,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
       main.innerHTML = `
         <div class="planeta-visao" id="planeta-visao">
           <div class="planeta-header">
-            <button class="btn-voltar" id="btn-voltar">← Voltar</button>
+            <button class="btn-voltar" id="btn-voltar">Voltar</button>
           </div>
           <div class="planeta-destaque" style="background: radial-gradient(circle at center, ${planeta.cor}33 0%, transparent 70%)">
             ${planetaArte(planeta.id, 100)}
@@ -371,7 +385,6 @@ document.addEventListener('DOMContentLoaded', () => {
         this.transicao(() => this.criarModoExploracao());
       });
 
-      Narrador.falar(planeta.narracaoChegada);
     },
 
     criarModoGaleria() {
@@ -388,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="galeria-header">
             <h2>📡 GALERIA DO SISTEMA SOLAR</h2>
             <p>Navegue pelas fichas técnicas de todos os corpos celestes</p>
-            <button class="btn-voltar-pequeno" id="galeria-voltar">← Menu</button>
+            <button class="btn-voltar-pequeno" id="galeria-voltar">Menu</button>
           </div>
           <div class="galeria-grade" id="galeria-grade"></div>
           <div class="galeria-painel" id="galeria-painel"></div>
@@ -438,7 +451,6 @@ document.addEventListener('DOMContentLoaded', () => {
         this.transicao(() => this.criarTelaInicial());
       });
 
-      Narrador.falar('Galeria do Sistema Solar! Clique em qualquer corpo celeste para ver sua ficha técnica completa.');
     },
 
     mostrarFichaPainel(p, labels, tamanhos) {
@@ -515,8 +527,6 @@ document.addEventListener('DOMContentLoaded', () => {
         this.mostrarPlaneta(planeta);
         this.estaViajando = false;
       });
-
-      Narrador.falarInstantaneo(`🛸 Viajando para ${planeta.nome}...`);
     },
 
     mostrarPlaneta(planeta) {
@@ -529,7 +539,7 @@ document.addEventListener('DOMContentLoaded', () => {
       main.innerHTML = `
         <div class="planeta-visao" id="planeta-visao">
           <div class="planeta-header">
-            <button class="btn-voltar" id="btn-voltar-mapa">← Voltar</button>
+            <button class="btn-voltar" id="btn-voltar-mapa">Voltar</button>
           </div>
 
           <div class="aventura-indicador">
@@ -579,16 +589,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       this.criarEstrelas();
       this.configurarAbaNavegacao(planeta, eODestinoAtual, jaCompleto);
-
-      Narrador.falar(planeta.narracaoChegada, () => {
-        setTimeout(() => {
-          if (eODestinoAtual) {
-            Narrador.falar(`Este é seu destino atual! Complete o desafio para avançar na jornada!`);
-          } else if (jaCompleto) {
-            Narrador.falar(`Você já completou este planeta! Volte à rota para continuar.`);
-          }
-        }, 1000);
-      });
     },
 
     configurarAbaNavegacao(planeta, eDestinoAtual, jaCompleto) {
@@ -619,24 +619,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.salvarProgresso();
 
                 if (this.jornadaIndice >= this.jornadaOrdem.length) {
-                  Narrador.falar('🎉 PARABÉNS! Você completou toda a jornada pelo Sistema Solar! Você é um verdadeiro explorador espacial!');
                   setTimeout(() => {
                     area.innerHTML = `<div class="desafio-completo" style="font-size:22px">🎉 VIAGEM COMPLETA!<br>Você explorou todo o Sistema Solar!</div>`;
                   }, 2000);
                 } else {
                   const prox = planetas.find(p => p.id === this.jornadaOrdem[this.jornadaIndice]);
-                  Narrador.falar(`Missão cumprida em ${planeta.nome}! Próximo destino: ${prox.nome}!`, () => {
-                    setTimeout(() => {
-                      const btnProx = document.createElement('button');
-                      btnProx.className = 'btn-avancar';
-                      btnProx.style.marginTop = '15px';
-                      btnProx.textContent = `🚀 IR PARA ${prox.nome}`;
-                      area.appendChild(btnProx);
-                      btnProx.addEventListener('click', () => {
-                        this.visitarPlaneta(prox.id);
-                      });
-                    }, 1000);
-                  });
+                  setTimeout(() => {
+                    const btnProx = document.createElement('button');
+                    btnProx.className = 'btn-avancar';
+                    btnProx.style.marginTop = '15px';
+                    btnProx.textContent = `🚀 IR PARA ${prox.nome}`;
+                    area.appendChild(btnProx);
+                    btnProx.addEventListener('click', () => {
+                      this.visitarPlaneta(prox.id);
+                    });
+                  }, 1000);
                 }
               }
             });
