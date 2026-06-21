@@ -252,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const ordemMapa = ['mercurio','venus','terra','marte','jupiter','saturno','urano','netuno','plutao'];
       const tamanhos = {
-        sol: isMobile ? 70 : 100, mercurio: isMobile ? 20 : 24, venus: isMobile ? 26 : 30,
+        mercurio: isMobile ? 20 : 24, venus: isMobile ? 26 : 30,
         terra: isMobile ? 28 : 32, marte: isMobile ? 22 : 26,
         jupiter: isMobile ? 40 : 48, saturno: isMobile ? 36 : 42,
         urano: isMobile ? 26 : 30, netuno: isMobile ? 26 : 30, plutao: isMobile ? 18 : 22
@@ -274,13 +274,6 @@ document.addEventListener('DOMContentLoaded', () => {
         mercurio: 50, venus: 120, terra: 200, marte: 80,
         jupiter: 300, saturno: 140, urano: 220, netuno: 10, plutao: 340
       };
-
-      const sol = document.createElement('div');
-      sol.className = 'corpo-celeste sol planeta-link';
-      sol.dataset.planeta = 'sol';
-      sol.innerHTML = `${planetaArte('sol', tamanhos.sol)}<span class="corpo-nome">Sol</span>`;
-      sol.addEventListener('click', () => this.mostrarPainelExploracao('sol'));
-      container.appendChild(sol);
 
       ordemMapa.forEach(id => {
         const p = planetas.find(pl => pl.id === id);
