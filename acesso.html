@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Acesso dedicado à Viagem Sistema Solar — jogo educativo espacial">
+  <title>Acesso Dedicado — Viagem Sistema Solar</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { margin: 0; min-height: 100vh; background: #0a0a1a; }
+    .pagina-acesso {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 36px 20px 48px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    .pagina-acesso .selo {
+      display: inline-block;
+      padding: 6px 14px;
+      margin-bottom: 12px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #0a0a1a;
+      background: linear-gradient(135deg, #FDB813, #FF6B00);
+      border-radius: 20px;
+    }
+    .pagina-acesso h1 {
+      color: #FDB813;
+      font-size: 24px;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .pagina-acesso .sub {
+      color: #8899bb;
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .link-dedicado {
+      display: block;
+      word-break: break-all;
+      padding: 14px;
+      background: rgba(253, 184, 19, 0.1);
+      border: 2px solid rgba(253, 184, 19, 0.45);
+      border-radius: 14px;
+      color: #FDB813;
+      font-family: monospace;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      margin-bottom: 12px;
+    }
+    .link-dedicado:hover { background: rgba(253, 184, 19, 0.18); }
+    .qr-wrap {
+      display: inline-block;
+      background: #fff;
+      padding: 14px;
+      border-radius: 16px;
+      margin: 16px 0;
+      min-height: 200px;
+      min-width: 200px;
+    }
+    .qr-wrap svg { display: block; }
+    .btn-entrar {
+      display: block;
+      width: 100%;
+      max-width: 320px;
+      margin: 12px auto 8px;
+      padding: 16px 24px;
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      background: linear-gradient(135deg, #FDB813, #FF6B00);
+      border: none;
+      border-radius: 50px;
+      color: #0a0a1a;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 0 28px rgba(253, 184, 19, 0.35);
+    }
+    .btn-entrar:hover { transform: scale(1.03); }
+    .btn-copiar {
+      width: 100%;
+      max-width: 320px;
+      padding: 14px;
+      margin: 4px auto;
+      display: block;
+      font-size: 15px;
+      font-weight: 700;
+      background: rgba(126, 200, 227, 0.15);
+      border: 2px solid rgba(126, 200, 227, 0.45);
+      border-radius: 12px;
+      color: #7EC8E3;
+      cursor: pointer;
+    }
+    .status { color: #6fcf6f; font-size: 14px; min-height: 20px; margin-top: 8px; }
+    .link-alt {
+      display: inline-block;
+      margin-top: 20px;
+      color: #667;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="estrelas-bg" id="estrelas"></div>
+  <div class="pagina-acesso">
+    <div style="font-size:52px;margin-bottom:4px">🚀</div>
+    <span class="selo">Acesso reservado</span>
+    <h1>Viagem Sistema Solar</h1>
+    <p class="sub">Link dedicado para abrir o jogo na web.<br>Compartilhe ou escaneie o QR Code abaixo.</p>
+
+    <a class="link-dedicado" id="link-dedicado" href="index.html"></a>
+    <div class="qr-wrap" id="qr"></div>
+    <a class="btn-entrar" id="btn-entrar" href="index.html?acesso=dedicado">▶ Entrar na missão</a>
+    <button type="button" class="btn-copiar" id="btn-copiar">📋 Copiar link dedicado</button>
+    <p class="status" id="status">Use este endereço como porta de entrada exclusiva do jogo.</p>
+    <a class="link-alt" href="index.html">Abrir jogo direto (sem página de acesso)</a>
+  </div>
+
+  <script src="js/qrcode-lib.js"></script>
+  <script>
+    function criarEstrelas() {
+      const c = document.getElementById('estrelas');
+      for (let i = 0; i < 80; i++) {
+        const e = document.createElement('div');
+        e.className = 'estrela';
+        e.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;width:${1+Math.random()*2}px;height:${1+Math.random()*2}px;animation-delay:${Math.random()*3}s`;
+        c.appendChild(e);
+      }
+    }
+
+    function obterUrlDedicada() {
+      const path = location.pathname.replace(/[^/]*$/, '');
+      return `${location.origin}${path}acesso.html`;
+    }
+
+    function renderizarQr(el, url) {
+      const qr = qrcode(0, 'M');
+      qr.addData(url);
+      qr.make();
+      el.innerHTML = qr.createSvgTag(6, 0);
+    }
+
+    async function copiar(texto) {
+      try {
+        await navigator.clipboard.writeText(texto);
+        return true;
+      } catch {
+        const ta = document.createElement('textarea');
+        ta.value = texto;
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        ta.remove();
+        return ok;
+      }
+    }
+
+    const url = obterUrlDedicada();
+    const linkEl = document.getElementById('link-dedicado');
+    linkEl.href = url;
+    linkEl.textContent = url;
+    renderizarQr(document.getElementById('qr'), url);
+
+    document.getElementById('btn-copiar').addEventListener('click', async () => {
+      const ok = await copiar(url);
+      document.getElementById('status').textContent = ok ? '✅ Link dedicado copiado!' : 'Copie manualmente o link acima.';
+    });
+
+    criarEstrelas();
+  </script>
+</body>
+</html>

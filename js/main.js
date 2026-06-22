@@ -211,8 +211,11 @@ document.addEventListener('DOMContentLoaded', () => {
               </div>
             </div>
           </div>
-          <a class="link-site-online" href="${RedeTeste.obterLinkOnline()}" target="_blank" rel="noopener">
-            🌐 Jogar online: jorgeramalho.github.io/Astronavesistemasolar
+          <a class="link-site-online link-site-dedicado" href="${RedeTeste.obterLinkDedicado()}" target="_blank" rel="noopener">
+            🔐 Acesso dedicado: ${RedeTeste.obterLinkDedicado().replace(/^https?:\/\//, '')}
+          </a>
+          <a class="link-site-online link-site-online-alt" href="${RedeTeste.obterLinkOnline()}" target="_blank" rel="noopener">
+            🌐 Site online: jorgeramalho.github.io/Astronavesistemasolar
           </a>
           <div class="estrelas-bg"></div>
         </div>
@@ -356,6 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const info = RedeTeste.obterInfoViewport();
       const emArquivo = RedeTeste.estaEmArquivoLocal();
       const linkOnline = RedeTeste.obterLinkOnline();
+      const linkDedicado = RedeTeste.obterLinkDedicado();
 
       main.innerHTML = `
         <div class="tela-teste-rede">
@@ -366,6 +370,20 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="rede-header-icon">🌐</span>
             <h2>Compartilhar Jogo</h2>
             <p>Acesse de qualquer lugar ou teste na rede local</p>
+          </div>
+
+          <div class="rede-link-box rede-link-box-dedicado">
+            <div class="rede-badge-dedicado">ACESSO DEDICADO</div>
+            <label class="rede-label">Link reservado — porta de entrada exclusiva</label>
+            <div class="rede-link-linha">
+              <input type="text" class="rede-link-input rede-link-input-dedicado" id="rede-link-dedicado" readonly value="${linkDedicado}">
+              <button type="button" class="btn-rede-copiar btn-rede-copiar-dedicado" id="btn-copiar-dedicado">Copiar</button>
+            </div>
+            <a class="btn-abrir-online btn-abrir-dedicado" href="${linkDedicado}" target="_blank" rel="noopener">Abrir acesso dedicado ↗</a>
+            <div class="rede-qr-wrap">
+              <div class="rede-qr-placeholder" id="rede-qr-dedicado"></div>
+            </div>
+            <p class="rede-link-dica" id="rede-status-dedicado">Compartilhe este link reservado para convidados entrarem direto na missão.</p>
           </div>
 
           <div class="rede-link-box rede-link-box-online">
@@ -424,6 +442,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       this.criarEstrelas();
 
+      const qrDedicado = document.getElementById('rede-qr-dedicado');
+      if (qrDedicado) RedeTeste.renderizarQrCode(qrDedicado, linkDedicado);
+
       const qrOnline = document.getElementById('rede-qr-online');
       if (qrOnline) RedeTeste.renderizarQrCode(qrOnline, linkOnline);
 
@@ -436,6 +457,12 @@ document.addEventListener('DOMContentLoaded', () => {
         RedeTeste.alternarOverlay();
         const btn = document.getElementById('btn-rede-overlay');
         if (btn) btn.textContent = `${RedeTeste.overlayAtivo ? 'Desativar' : 'Ativar'} overlay responsivo`;
+      });
+
+      document.getElementById('btn-copiar-dedicado')?.addEventListener('click', async () => {
+        const ok = await RedeTeste.copiarTexto(linkDedicado);
+        const st = document.getElementById('rede-status-dedicado');
+        if (st) st.textContent = ok ? '✅ Link dedicado copiado!' : 'Copie manualmente o link acima.';
       });
 
       document.getElementById('btn-copiar-online')?.addEventListener('click', async () => {
