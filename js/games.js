@@ -37,6 +37,36 @@ const Jogos = {
     return ('ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth < 768);
   },
 
+  scrollParaControlesMobile() {
+    if (!this.usarControlesTouch()) return;
+
+    const rolar = () => {
+      const alvo = this._controlesTouchEl || document.querySelector('.controles-touch')
+        || document.querySelector('.area-jogo-arcade');
+      if (!alvo) return;
+
+      const rodape = document.querySelector('.planeta-rodape');
+      const margemInferior = (rodape?.offsetHeight || 0) + 16;
+      const margemSuperior = 12;
+      const rect = alvo.getBoundingClientRect();
+
+      const acima = rect.top < margemSuperior;
+      const abaixo = rect.bottom > window.innerHeight - margemInferior;
+      if (!acima && !abaixo) return;
+
+      const destino = abaixo
+        ? window.scrollY + rect.bottom - window.innerHeight + margemInferior
+        : window.scrollY + rect.top - margemSuperior;
+
+      window.scrollTo({ top: Math.max(0, destino), behavior: 'smooth' });
+    };
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(rolar);
+      setTimeout(rolar, 400);
+    });
+  },
+
   removerControlesTouch() {
     this._controlesTouchEl?.remove();
     this._controlesTouchEl = null;
@@ -151,10 +181,12 @@ const Jogos = {
     const desafio = planeta.desafio;
     if (!desafio) return;
 
-    const titulo = document.createElement('h3');
-    titulo.className = 'desafio-titulo';
-    titulo.textContent = `🎮 ${desafio.nome}`;
-    container.appendChild(titulo);
+    if (!this.usarControlesTouch()) {
+      const titulo = document.createElement('h3');
+      titulo.className = 'desafio-titulo';
+      titulo.textContent = `🎮 ${desafio.nome}`;
+      container.appendChild(titulo);
+    }
 
     const desc = document.createElement('p');
     desc.className = 'desafio-descricao';
@@ -184,6 +216,8 @@ const Jogos = {
       case 'plutoMiner': this.jogoPlutoMiner(desafio, areaJogo, container); break;
       default: areaJogo.innerHTML = '<p>Jogo em desenvolvimento...</p>';
     }
+
+    this.scrollParaControlesMobile();
   },
 
   finalizarJogo(container, venceu, mensagem) {

@@ -8,9 +8,19 @@ document.addEventListener('DOMContentLoaded', () => {
     jornadaIndice: 0,
     jornadaCompletos: [],
 
+    obterLabelsFicha() {
+      return {
+        diametro: 'Diâmetro', massa: 'Massa', temperatura: 'Temperatura',
+        idade: 'Idade', tipo: 'Tipo', composicao: 'Composição',
+        distanciaSol: 'Distância do Sol', periodoOrbital: 'Período Orbital',
+        distanciaTerra: 'Distância da Terra', descoberta: 'Descoberta'
+      };
+    },
+
     init() {
       Jogos.init();
       RedeTeste.init();
+      TripulacaoNaracao.init();
       this.carregarProgresso();
       this.criarTelaInicial();
       this.initControlesAudio();
@@ -62,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     transicao(callback) {
+      TripulacaoNaracao.parar();
       const overlay = document.getElementById('transition-overlay');
       overlay.classList.add('ativo');
       setTimeout(() => {
@@ -165,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <h1 class="titulo-jogo">VIAGEM<br>SISTEMA SOLAR</h1>
             <p class="subtitulo-jogo">Uma aventura pelos planetas, o Sol e a Lua</p>
           </div>
+          ${temProgresso ? '<button class="btn-continuar" id="btn-continuar">▶ CONTINUAR JORNADA</button>' : ''}
           <div class="modos-menu">
             <div class="modo-card" data-modo="aventura">
               <div class="modo-card-icon">👨‍🚀</div>
@@ -202,7 +214,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <a class="link-site-online" href="${RedeTeste.obterLinkOnline()}" target="_blank" rel="noopener">
             🌐 Jogar online: jorgeramalho.github.io/Astronavesistemasolar
           </a>
-          ${temProgresso ? '<button class="btn-continuar" id="btn-continuar">▶ CONTINUAR JORNADA</button>' : ''}
           <div class="estrelas-bg"></div>
         </div>
       `;
@@ -231,6 +242,14 @@ document.addEventListener('DOMContentLoaded', () => {
           this.modoAtual = 'aventura';
           this.transicao(() => this.criarRotaAventura());
         });
+      }
+
+      TripulacaoNaracao.definirContexto('menu');
+      if (!sessionStorage.getItem('trip_boas_vindas')) {
+        sessionStorage.setItem('trip_boas_vindas', '1');
+        setTimeout(() => {
+          TripulacaoNaracao.dialogo(TripulantesDialogos.boasVindas());
+        }, 700);
       }
     },
 
@@ -321,6 +340,14 @@ document.addEventListener('DOMContentLoaded', () => {
         this.transicao(() => this.criarTelaInicial());
       });
 
+      const destino = planetas.find(p => p.id === this.jornadaOrdem[this.jornadaIndice]);
+      TripulacaoNaracao.definirContexto('rota', destino);
+      setTimeout(() => {
+        const falas = this.temJornadaEmAndamento() && this.jornadaCompletos.length > 0
+          ? TripulantesDialogos.continuarJornada(this.jornadaCompletos.length + 1, this.jornadaOrdem.length)
+          : TripulantesDialogos.rotaAventura(destino?.nome);
+        TripulacaoNaracao.dialogo(falas, { manterHUD: true });
+      }, 500);
     },
 
     criarTelaTesteRede() {
@@ -517,29 +544,41 @@ document.addEventListener('DOMContentLoaded', () => {
       const main = document.getElementById('main-container');
 
       main.innerHTML = `
-        <div class="voltar-bar voltar-bar--fixo">
-          <button class="btn-voltar" id="explorar-voltar">Voltar ao Menu</button>
-        </div>
-        <div class="mapa-sistema" id="mapa-sistema">
-          <div class="mapa-header">
-            <h2>🚀 MODO EXPLORAÇÃO</h2>
-            <p>Passe o mouse nos planetas para ampliar e clique para ver a ficha técnica!</p>
+        <div class="exploracao-modo">
+          <div class="mapa-sistema" id="mapa-sistema">
+            <div class="mapa-header">
+              <h2>🚀 MODO EXPLORAÇÃO</h2>
+              <p>Explore o mapa ou toque nas fichas abaixo para ver dados de cada corpo celeste!</p>
+            </div>
+            <div class="exploracao-wrapper" id="exploracao-wrapper">
+              <div class="orbita-container" id="orbita-container"></div>
+            </div>
+            <section class="exploracao-catalogo" id="exploracao-catalogo" aria-label="Fichas técnicas">
+              <h3 class="exploracao-catalogo-titulo">📋 Fichas Técnicas</h3>
+              <p class="exploracao-catalogo-sub">Sol, planetas e Lua — toque para ver informações completas</p>
+              <div class="exploracao-catalogo-grade" id="exploracao-catalogo-grade"></div>
+            </section>
+            <div class="exploracao-painel" id="exploracao-painel"></div>
           </div>
-          <div class="exploracao-wrapper" id="exploracao-wrapper">
-            <div class="orbita-container" id="orbita-container"></div>
-          </div>
-          <div class="exploracao-painel" id="exploracao-painel"></div>
+          <footer class="planeta-rodape">
+            <button class="btn-voltar" id="explorar-voltar">Voltar ao Menu</button>
+          </footer>
         </div>
         <div class="estrelas-bg"></div>
       `;
 
       this.criarEstrelas();
       this.criarOrbitasExploracao();
+      this.criarCatalogoExploracao();
 
       document.getElementById('explorar-voltar').addEventListener('click', () => {
         this.transicao(() => this.criarTelaInicial());
       });
 
+      TripulacaoNaracao.definirContexto('exploracao');
+      setTimeout(() => {
+        TripulacaoNaracao.dialogo(TripulantesDialogos.exploracao(), { manterHUD: true });
+      }, 500);
     },
 
     criarOrbitasExploracao() {
@@ -617,7 +656,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let html = planetaArte(id, tamanhos[id]);
         if (id === 'terra') {
-          html += `<div class="lua-companhia" data-planeta="lua">${planetaArte('lua', 16)}</div>`;
+          html += `<div class="lua-companhia" data-planeta="lua" role="button" tabindex="0" aria-label="Lua">${planetaArte('lua', 16)}</div>`;
         }
         html += `<span class="corpo-nome">${p.nome}</span>`;
         planetaEl.innerHTML = html;
@@ -630,9 +669,46 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           this.mostrarPainelExploracao(id);
         });
+
+        const luaEl = planetaEl.querySelector('.lua-companhia');
+        if (luaEl) {
+          const abrirLua = (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            this.mostrarPainelExploracao('lua');
+          };
+          luaEl.addEventListener('click', abrirLua);
+          luaEl.addEventListener('touchend', abrirLua);
+        }
+
         planetaWrapper.appendChild(planetaEl);
         orbita.appendChild(planetaWrapper);
         container.appendChild(orbita);
+      });
+    },
+
+    criarCatalogoExploracao() {
+      const grade = document.getElementById('exploracao-catalogo-grade');
+      if (!grade) return;
+
+      const ordem = ['sol', 'mercurio', 'venus', 'terra', 'lua', 'marte', 'jupiter', 'saturno', 'urano', 'netuno', 'plutao'];
+      const tamanhos = { sol: 40, mercurio: 28, venus: 30, terra: 30, lua: 26, marte: 28, jupiter: 36, saturno: 34, urano: 30, netuno: 30, plutao: 26 };
+
+      ordem.forEach(id => {
+        const p = planetas.find(pl => pl.id === id);
+        if (!p) return;
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'exploracao-catalogo-item';
+        btn.style.borderColor = p.cor;
+        btn.innerHTML = `
+          ${planetaArte(id, tamanhos[id] || 28)}
+          <span class="exploracao-catalogo-nome" style="color:${p.cor}">${p.nome}</span>
+          <span class="exploracao-catalogo-tipo">${p.tipo}</span>
+        `;
+        btn.addEventListener('click', () => this.mostrarPainelExploracao(id));
+        grade.appendChild(btn);
       });
     },
 
@@ -642,12 +718,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const painel = document.getElementById('exploracao-painel');
       if (!painel) return;
 
-      const labels = {
-        diametro: 'Diâmetro', massa: 'Massa', temperatura: 'Temperatura',
-        idade: 'Idade', tipo: 'Tipo', composicao: 'Composição',
-        distanciaSol: 'Distância do Sol', periodoOrbital: 'Período Orbital',
-        distanciaTerra: 'Distância da Terra', descoberta: 'Descoberta'
-      };
+      TripulacaoNaracao.definirContexto('exploracao', p);
+
+      const labels = this.obterLabelsFicha();
 
       painel.innerHTML = `
         <div class="exploracao-painel-overlay" id="exploracao-painel-fechar"></div>
@@ -856,25 +929,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
       main.innerHTML = `
         <div class="planeta-visao ${planeta.id === 'lua' ? 'lua-ambiente' : ''}" id="planeta-visao">
-          <div class="voltar-bar">
-            <button class="btn-voltar" id="btn-voltar-mapa">Voltar ao Mapa</button>
-          </div>
-
-          <div class="aventura-indicador">
-            ${jaCompleto ? '✅ Missão cumprida!' : (eODestinoAtual ? '🚀 Destino atual - Complete o desafio!' : '')}
-          </div>
-
           <div class="planeta-destaque" style="background: radial-gradient(circle at center, ${planeta.cor}33 0%, transparent 70%)">
+            ${jaCompleto
+              ? '<p class="aventura-indicador aventura-indicador--completo">✅ Missão cumprida!</p>'
+              : (eODestinoAtual ? '<p class="aventura-indicador">Destino atual — complete o desafio</p>' : '')}
             ${planetaArte(planeta.id, 100)}
             <h2 class="planeta-nome" style="color: ${planeta.cor}">${planeta.nome}</h2>
             <span class="planeta-tipo">${planeta.tipo}</span>
           </div>
 
           <div class="planeta-conteudo">
-            <div class="planeta-abas">
+            <div class="desafio-destaque-wrap">
+              <button type="button" class="btn-desafio-principal aba-btn${jaCompleto ? ' concluido' : ''}${eODestinoAtual && !jaCompleto ? ' pulsar' : ''}" data-aba="desafio">
+                ${jaCompleto ? '✅ Desafio concluído' : '🎮 Iniciar Desafio'}
+              </button>
+              ${planeta.desafio ? `<p class="desafio-destaque-sub">${planeta.desafio.nome}</p>` : ''}
+            </div>
+
+            <div class="planeta-abas planeta-abas-secundarias">
               <button class="aba-btn ativa" data-aba="ficha">📋 Ficha Técnica</button>
               <button class="aba-btn" data-aba="curiosidades">💡 Curiosidades</button>
-              <button class="aba-btn" data-aba="desafio">🎮 Desafio</button>
             </div>
 
             <div class="aba-conteudo ativa" id="aba-ficha">
@@ -898,83 +972,140 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
 
             <div class="aba-conteudo" id="aba-desafio">
-              <div class="desafio-area" id="desafio-area"></div>
+              <div class="desafio-tela-jogo">
+                <div class="desafio-jogo-topo">
+                  <button type="button" class="btn-voltar-info" id="btn-voltar-info-planeta">← Informações do planeta</button>
+                  <h3 class="desafio-jogo-titulo">🎮 ${planeta.desafio?.nome || 'Desafio'}</h3>
+                </div>
+                <div class="desafio-area" id="desafio-area"></div>
+              </div>
             </div>
           </div>
+
+          <footer class="planeta-rodape">
+            <button class="btn-voltar btn-voltar-mapa" id="btn-voltar-mapa">Voltar ao Mapa</button>
+          </footer>
         </div>
         <div class="estrelas-bg"></div>
       `;
 
       this.criarEstrelas();
       this.configurarAbaNavegacao(planeta, eODestinoAtual, jaCompleto);
+
+      TripulacaoNaracao.definirContexto('planeta', planeta);
+      TripulacaoNaracao.modoCompacto(false);
+      setTimeout(() => {
+        TripulacaoNaracao.dialogo(TripulantesDialogos.chegada(planeta), { manterHUD: true });
+      }, 450);
     },
 
     configurarAbaNavegacao(planeta, eDestinoAtual, jaCompleto) {
       const btns = document.querySelectorAll('.aba-btn');
+      const visao = document.getElementById('planeta-visao');
       let desafioCarregado = false;
+
+      const ativarAba = (abaId) => {
+        btns.forEach(b => b.classList.remove('ativa'));
+        document.querySelectorAll('.aba-conteudo').forEach(c => c.classList.remove('ativa'));
+        const btn = document.querySelector(`.aba-btn[data-aba="${abaId}"]`);
+        const aba = document.getElementById(`aba-${abaId}`);
+        if (btn) btn.classList.add('ativa');
+        if (aba) aba.classList.add('ativa');
+      };
+
+      const entrarModoDesafio = () => {
+        visao?.classList.add('planeta-visao--jogo');
+        if (!Jogos.usarControlesTouch()) {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      };
+
+      const sairModoDesafio = () => {
+        visao?.classList.remove('planeta-visao--jogo');
+        TripulacaoNaracao.modoCompacto(false);
+        Jogos.pararJogo();
+        Jogos.setCallback(null);
+        desafioCarregado = false;
+        ativarAba('ficha');
+      };
+
+      const iniciarTelaDesafio = () => {
+        ativarAba('desafio');
+        entrarModoDesafio();
+        TripulacaoNaracao.modoCompacto(true);
+        const area = document.getElementById('desafio-area');
+        if (!area) return;
+
+        if (jaCompleto) {
+          area.innerHTML = `<div class="desafio-completo">✅ Fase concluída! Esta parada não está mais disponível. Siga para a próxima.</div>`;
+          desafioCarregado = true;
+          return;
+        }
+
+        TripulacaoNaracao.dialogo(TripulantesDialogos.inicioDesafio(planeta));
+
+        Jogos.pararJogo();
+        Jogos.setCallback((venceu) => {
+          if (venceu && eDestinoAtual) {
+            TripulacaoNaracao.modoCompacto(false);
+            TripulacaoNaracao.dialogo(TripulantesDialogos.vitoriaDesafio(planeta), { manterHUD: true });
+
+            this.jornadaCompletos.push(planeta.id);
+            this.jornadaIndice++;
+            this.salvarProgresso();
+
+            if (this.jornadaIndice >= this.jornadaOrdem.length) {
+              setTimeout(() => {
+                const btn = document.querySelector('.btn-continuar-jogo');
+                if (btn) {
+                  btn.addEventListener('click', () => {
+                    setTimeout(() => this.transicao(() => this.mostrarApresentacaoFinal()), 400);
+                  }, { once: true });
+                } else {
+                  this.transicao(() => this.mostrarApresentacaoFinal());
+                }
+              }, 100);
+            } else {
+              const prox = planetas.find(p => p.id === this.jornadaOrdem[this.jornadaIndice]);
+              setTimeout(() => {
+                area.innerHTML = `
+                  <div class="desafio-completo">
+                    ✅ Missão cumprida!<br>
+                    Próxima parada: <strong style="color:${prox.cor}">${prox.nome}</strong>
+                    <button class="btn-avancar" id="btn-seguir-proximo">🚀 Seguir para ${prox.nome}</button>
+                  </div>
+                `;
+                document.getElementById('btn-seguir-proximo').addEventListener('click', () => {
+                  Jogos.pararJogo();
+                  Jogos.setCallback(null);
+                  this.visitarPlaneta(prox.id);
+                });
+              }, 1000);
+            }
+          }
+        });
+
+        Jogos.jogar(planeta, area);
+        desafioCarregado = true;
+      };
 
       btns.forEach(btn => {
         btn.addEventListener('click', () => {
-          btns.forEach(b => b.classList.remove('ativa'));
-          btn.classList.add('ativa');
-          document.querySelectorAll('.aba-conteudo').forEach(c => c.classList.remove('ativa'));
-          const aba = document.getElementById(`aba-${btn.dataset.aba}`);
-          if (aba) aba.classList.add('ativa');
-
-          if (btn.dataset.aba === 'desafio' && !desafioCarregado) {
-            desafioCarregado = true;
-            const area = document.getElementById('desafio-area');
-
-            if (jaCompleto) {
-              area.innerHTML = `<div class="desafio-completo">✅ Fase concluída! Esta parada não está mais disponível. Siga para a próxima.</div>`;
-              return;
-            }
-
-            Jogos.setCallback((venceu) => {
-              if (venceu && eDestinoAtual) {
-                this.jornadaCompletos.push(planeta.id);
-                this.jornadaIndice++;
-                this.salvarProgresso();
-
-                if (this.jornadaIndice >= this.jornadaOrdem.length) {
-                  setTimeout(() => {
-                    const btn = document.querySelector('.btn-continuar-jogo');
-                    if (btn) {
-                      btn.addEventListener('click', () => {
-                        setTimeout(() => this.transicao(() => this.mostrarApresentacaoFinal()), 400);
-                      }, { once: true });
-                    } else {
-                      this.transicao(() => this.mostrarApresentacaoFinal());
-                    }
-                  }, 100);
-                } else {
-                  const prox = planetas.find(p => p.id === this.jornadaOrdem[this.jornadaIndice]);
-                  setTimeout(() => {
-                    area.innerHTML = `
-                      <div class="desafio-completo">
-                        ✅ Missão cumprida!<br>
-                        Próxima parada: <strong style="color:${prox.cor}">${prox.nome}</strong>
-                        <button class="btn-avancar" id="btn-seguir-proximo">🚀 Seguir para ${prox.nome}</button>
-                      </div>
-                    `;
-                    document.getElementById('btn-seguir-proximo').addEventListener('click', () => {
-                      Jogos.pararJogo();
-                      Jogos.setCallback(null);
-                      this.visitarPlaneta(prox.id);
-                    });
-                  }, 1000);
-                }
-              }
-            });
-
-            Jogos.jogar(planeta, area);
+          if (btn.dataset.aba === 'desafio') {
+            iniciarTelaDesafio();
+            return;
           }
+          sairModoDesafio();
+          ativarAba(btn.dataset.aba);
         });
       });
 
+      document.getElementById('btn-voltar-info-planeta')?.addEventListener('click', () => {
+        sairModoDesafio();
+      });
+
       document.getElementById('btn-voltar-mapa').addEventListener('click', () => {
-        Jogos.pararJogo();
-        Jogos.setCallback(null);
+        sairModoDesafio();
         this.transicao(() => this.criarRotaAventura());
       });
     },
@@ -1056,8 +1187,7 @@ document.addEventListener('DOMContentLoaded', () => {
           document.querySelector('.recap-cabecalho')?.classList.add('oculto');
           document.querySelector('.recap-barra')?.classList.add('oculto');
           finale?.classList.remove('oculto');
-          const texto = document.getElementById('recap-narracao')?.textContent?.trim();
-          if (texto) NaracaoEspaco.narrar(texto);
+          TripulacaoNaracao.dialogo(TripulantesDialogos.finale(), { manterHUD: true });
         }
       };
 
