@@ -211,10 +211,10 @@ document.addEventListener('DOMContentLoaded', () => {
               </div>
             </div>
           </div>
-          <a class="link-site-online link-site-dedicado" href="${RedeTeste.obterLinkDedicado()}" target="_blank" rel="noopener">
+          <a class="link-site-online link-site-dedicado" href="${RedeTeste.obterLinkDedicado()}" rel="noopener noreferrer">
             🔐 Acesso dedicado: ${RedeTeste.obterLinkDedicado().replace(/^https?:\/\//, '')}
           </a>
-          <a class="link-site-online link-site-online-alt" href="${RedeTeste.obterLinkOnline()}" target="_blank" rel="noopener">
+          <a class="link-site-online link-site-online-alt" href="${RedeTeste.obterLinkOnline()}" rel="noopener noreferrer">
             🌐 Site online: jorgeramalho.github.io/Astronavesistemasolar
           </a>
           <div class="estrelas-bg"></div>
@@ -379,7 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <input type="text" class="rede-link-input rede-link-input-dedicado" id="rede-link-dedicado" readonly value="${linkDedicado}">
               <button type="button" class="btn-rede-copiar btn-rede-copiar-dedicado" id="btn-copiar-dedicado">Copiar</button>
             </div>
-            <a class="btn-abrir-online btn-abrir-dedicado" href="${linkDedicado}" target="_blank" rel="noopener">Abrir acesso dedicado ↗</a>
+            <a class="btn-abrir-online btn-abrir-dedicado" href="${linkDedicado}" rel="noopener noreferrer">Abrir acesso dedicado ↗</a>
             <div class="rede-qr-wrap">
               <div class="rede-qr-placeholder" id="rede-qr-dedicado"></div>
             </div>

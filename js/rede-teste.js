@@ -44,26 +44,37 @@ const RedeTeste = {
     return null;
   },
 
+  obterBaseOnline() {
+    const base = this.SITE_ONLINE_URL.replace(/\/?$/, '/');
+    return base;
+  },
+
+  obterBasePath() {
+    if (this.estaEmArquivoLocal() || this.estaNoSiteOnline()) {
+      return this.obterBaseOnline();
+    }
+    const segmentos = location.pathname.split('/').filter(Boolean);
+    if (segmentos.length && segmentos[segmentos.length - 1].includes('.')) {
+      segmentos.pop();
+    }
+    const dir = segmentos.length ? `/${segmentos.join('/')}/` : '/';
+    return `${location.origin}${dir}`;
+  },
+
   obterLinkOnline() {
-    return this.SITE_ONLINE_URL;
+    return this.obterBaseOnline();
   },
 
   obterLinkDedicado() {
-    if (location.protocol.startsWith('http') && !this.estaEmArquivoLocal()) {
-      const base = location.origin + location.pathname.replace(/[^/]*$/, '/');
-      return base + this.ACESSO_DEDICADO_PATH;
-    }
-    const base = this.SITE_ONLINE_URL.endsWith('/') ? this.SITE_ONLINE_URL : this.SITE_ONLINE_URL + '/';
-    return base + this.ACESSO_DEDICADO_PATH;
+    return `${this.obterBasePath()}${this.ACESSO_DEDICADO_PATH}`;
+  },
+
+  obterLinkJogo() {
+    return `${this.obterBasePath()}index.html`;
   },
 
   obterLinkJogoDedicado() {
-    const entrada = this.obterLinkDedicado();
-    if (location.protocol.startsWith('http') && !this.estaEmArquivoLocal()) {
-      const base = location.origin + location.pathname.replace(/[^/]*$/, '/');
-      return `${base}index.html?acesso=dedicado`;
-    }
-    return this.SITE_ONLINE_URL.replace(/\/?$/, '/') + '?acesso=dedicado';
+    return `${this.obterBasePath()}index.html?acesso=dedicado`;
   },
 
   estaNoSiteOnline() {

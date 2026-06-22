@@ -55,7 +55,7 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 100px 20px 80px;
+  padding: 100px 20px 140px;
   position: relative;
 }
 
@@ -3340,6 +3340,8 @@ body {
   background: rgba(253, 184, 19, 0.1);
   border-color: rgba(253, 184, 19, 0.4);
   margin-top: 20px;
+  position: relative;
+  z-index: 3;
 }
 
 .link-site-dedicado:hover {

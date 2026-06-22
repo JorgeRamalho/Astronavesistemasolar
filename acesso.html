@@ -114,12 +114,12 @@
     <h1>Viagem Sistema Solar</h1>
     <p class="sub">Link dedicado para abrir o jogo na web.<br>Compartilhe ou escaneie o QR Code abaixo.</p>
 
-    <a class="link-dedicado" id="link-dedicado" href="index.html"></a>
+    <a class="link-dedicado" id="link-dedicado" href="#"></a>
     <div class="qr-wrap" id="qr"></div>
-    <a class="btn-entrar" id="btn-entrar" href="index.html?acesso=dedicado">▶ Entrar na missão</a>
+    <a class="btn-entrar" id="btn-entrar" href="#">▶ Entrar na missão</a>
     <button type="button" class="btn-copiar" id="btn-copiar">📋 Copiar link dedicado</button>
     <p class="status" id="status">Use este endereço como porta de entrada exclusiva do jogo.</p>
-    <a class="link-alt" href="index.html">Abrir jogo direto (sem página de acesso)</a>
+    <a class="link-alt" id="link-jogo-direto" href="#">Abrir jogo direto (sem página de acesso)</a>
   </div>
 
   <script src="js/qrcode-lib.js"></script>
@@ -134,16 +134,41 @@
       }
     }
 
+    const SITE_BASE = 'https://jorgeramalho.github.io/Astronavesistemasolar/';
+
+    function resolverBase() {
+      if (location.hostname.includes('github.io') || location.protocol === 'file:') {
+        return SITE_BASE;
+      }
+      const segmentos = location.pathname.split('/').filter(Boolean);
+      if (segmentos.length && segmentos[segmentos.length - 1].includes('.')) {
+        segmentos.pop();
+      }
+      const dir = segmentos.length ? `/${segmentos.join('/')}/` : '/';
+      return `${location.origin}${dir}`;
+    }
+
     function obterUrlDedicada() {
-      const path = location.pathname.replace(/[^/]*$/, '');
-      return `${location.origin}${path}acesso.html`;
+      return `${resolverBase()}acesso.html`;
+    }
+
+    function obterUrlJogo() {
+      return `${resolverBase()}index.html?acesso=dedicado`;
     }
 
     function renderizarQr(el, url) {
-      const qr = qrcode(0, 'M');
-      qr.addData(url);
-      qr.make();
-      el.innerHTML = qr.createSvgTag(6, 0);
+      if (typeof qrcode !== 'function') {
+        el.innerHTML = '<p style="color:#667;font-size:13px;padding:20px">QR indisponível — use o link acima.</p>';
+        return;
+      }
+      try {
+        const qr = qrcode(0, 'M');
+        qr.addData(url);
+        qr.make();
+        el.innerHTML = qr.createSvgTag(6, 0);
+      } catch {
+        el.innerHTML = '<p style="color:#667;font-size:13px;padding:20px">QR indisponível — use o link acima.</p>';
+      }
     }
 
     async function copiar(texto) {
@@ -162,9 +187,12 @@
     }
 
     const url = obterUrlDedicada();
+    const urlJogo = obterUrlJogo();
     const linkEl = document.getElementById('link-dedicado');
     linkEl.href = url;
-    linkEl.textContent = url;
+    linkEl.textContent = url.replace(/^https?:\/\//, '');
+    document.getElementById('btn-entrar').href = urlJogo;
+    document.getElementById('link-jogo-direto').href = `${resolverBase()}index.html`;
     renderizarQr(document.getElementById('qr'), url);
 
     document.getElementById('btn-copiar').addEventListener('click', async () => {
