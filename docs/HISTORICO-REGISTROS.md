@@ -269,7 +269,7 @@ A sessão concentrou-se em:
 
 | Hash | Mensagem |
 |------|----------|
-| `9d26dec` | `docs: adiciona README e historico profissional de desenvolvimento` |
+| `2c6a942` | `docs: adiciona README e historico profissional de desenvolvimento` |
 
 ---
 
