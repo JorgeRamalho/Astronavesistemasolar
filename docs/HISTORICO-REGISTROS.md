@@ -356,7 +356,7 @@ A sessão concentrou-se em:
 | `2c6a942` | `docs: adiciona README e historico profissional de desenvolvimento` |
 | `481c3de` | `docs: atualiza hash de referencia no historico de registros` |
 | `9a16f91` | `docs: inclui commits recentes de main e desta branch na linha do tempo` |
-| `8f5f711` | `docs: registra refinamento do modo exploracao e tripulacao voice-only` |
+| `667c654` | `docs: registra refinamento do modo exploracao e tripulacao voice-only` |
 
 ---
 

@@ -48,4 +48,4 @@ Este repositório segue um fluxo simples, adequado a um projeto estático public
 | `2c6a942` | README, BRANCHES e HISTORICO-REGISTROS |
 | `481c3de` | Atualização de referência no histórico |
 | `9a16f91` | Linha do tempo com commits recentes de main |
-| `8f5f711` | Registro da rodada de exploração e tripulação voice-only |
+| `667c654` | Registro da rodada de exploração e tripulação voice-only |
