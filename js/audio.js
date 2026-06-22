@@ -96,7 +96,6 @@ const TripulacaoNaracao = {
   _falando: false,
   _ativo: true,
   _contexto: { tela: 'menu', planeta: null },
-  _hideTimer: null,
   _els: {},
 
   perfis: {
@@ -113,51 +112,17 @@ const TripulacaoNaracao = {
   },
 
   _montarHUD() {
-    const existente = document.getElementById('tripulantes-hud');
-    if (existente) existente.remove();
+    document.getElementById('tripulantes-hud')?.remove();
 
-    const hud = document.createElement('div');
-    hud.id = 'tripulantes-hud';
-    hud.className = 'tripulantes-hud oculto';
-    hud.setAttribute('aria-live', 'polite');
-    hud.innerHTML = `
-      <div class="tripulantes-hud-inner">
-        <button type="button" class="trip-personagem" data-trip="alexis" aria-label="Comandante Alexis">
-          <span class="trip-avatar">👨‍🚀</span>
-          <span class="trip-nome">Alexis</span>
-        </button>
-        <div class="trip-balao">
-          <span class="trip-falante"></span>
-          <p class="trip-texto"></p>
-        </div>
-        <button type="button" class="trip-personagem" data-trip="caroll" aria-label="Navegadora Caroll">
-          <span class="trip-avatar">👩‍🚀</span>
-          <span class="trip-nome">Caroll</span>
-        </button>
-      </div>
-      <button type="button" class="trip-toggle-narracao ativo" id="trip-toggle-narracao" title="Voz da tripulação">🗣️</button>
-    `;
-    document.getElementById('app-container').appendChild(hud);
+    const toggle = document.getElementById('trip-toggle-narracao');
+    if (!toggle) return;
 
-    this._els = {
-      hud,
-      balao: hud.querySelector('.trip-balao'),
-      falante: hud.querySelector('.trip-falante'),
-      texto: hud.querySelector('.trip-texto'),
-      personagens: hud.querySelectorAll('.trip-personagem'),
-      toggle: hud.querySelector('#trip-toggle-narracao')
-    };
+    this._els = { toggle };
 
-    hud.querySelector('[data-trip="alexis"]').addEventListener('click', () => {
-      this._interagir('alexis');
-    });
-    hud.querySelector('[data-trip="caroll"]').addEventListener('click', () => {
-      this._interagir('caroll');
-    });
-    this._els.toggle.addEventListener('click', () => {
+    toggle.addEventListener('click', () => {
       this._ativo = !this._ativo;
-      this._els.toggle.classList.toggle('ativo', this._ativo);
-      this._els.toggle.textContent = this._ativo ? '🗣️' : '🔇';
+      toggle.classList.toggle('ativo', this._ativo);
+      toggle.textContent = this._ativo ? '🗣️' : '🔇';
       if (!this._ativo) this.parar();
     });
   },
@@ -189,51 +154,20 @@ const TripulacaoNaracao = {
     this._contexto = { tela, planeta };
   },
 
-  mostrarHUD(manter = false) {
-    clearTimeout(this._hideTimer);
-    this._els.hud?.classList.remove('oculto');
-    if (!manter && !this._falando) {
-      this._hideTimer = setTimeout(() => {
-        if (!this._falando) this._els.hud?.classList.add('oculto');
-      }, 12000);
-    }
-  },
+  mostrarHUD() {},
 
-  ocultarHUD() {
-    clearTimeout(this._hideTimer);
-    this._els.hud?.classList.add('oculto');
-  },
+  ocultarHUD() {},
 
-  modoCompacto(ativo) {
-    this._els.hud?.classList.toggle('tripulantes-hud--compacto', ativo);
-  },
-
-  _destacarFalante(quem) {
-    this._els.personagens?.forEach(btn => {
-      btn.classList.toggle('trip-personagem--ativa', btn.dataset.trip === quem);
-    });
-    const info = TripulantesDialogos[quem];
-    if (this._els.falante && info) {
-      this._els.falante.textContent = `${info.emoji} ${info.nome}`;
-    }
-  },
-
-  _atualizarBalao(quem, texto) {
-    this._destacarFalante(quem);
-    if (this._els.texto) this._els.texto.textContent = texto;
-    this.mostrarHUD(true);
-  },
+  modoCompacto() {},
 
   _falarUm(quem, texto) {
     return new Promise((resolve) => {
       if (!this._ativo || !('speechSynthesis' in window)) {
-        this._atualizarBalao(quem, texto);
         setTimeout(resolve, Math.min(4000, texto.length * 45));
         return;
       }
 
       if (!this._vozesCarregadas) this._carregarVozes();
-      this._atualizarBalao(quem, texto);
 
       const utterance = new SpeechSynthesisUtterance(texto);
       utterance.lang = 'pt-BR';
@@ -253,7 +187,6 @@ const TripulacaoNaracao = {
     if (!falas?.length) return;
     this.parar(false);
     this._falando = true;
-    this.mostrarHUD(true);
 
     for (const fala of falas) {
       if (!this._ativo) break;
@@ -263,44 +196,23 @@ const TripulacaoNaracao = {
     }
 
     this._falando = false;
-    if (!opcoes.manterHUD) {
-      this.mostrarHUD(false);
-    } else {
-      this.mostrarHUD(true);
-    }
   },
 
   narrar(texto, onFim) {
     this.dialogo([{ quem: 'caroll', texto }]).then(() => { if (onFim) onFim(); });
   },
 
-  _interagir(quem) {
-    if (this._falando) return;
-    const p = this._contexto.planeta;
-    const texto = quem === 'alexis'
-      ? TripulantesDialogos.dicaAlexis(p)
-      : TripulantesDialogos.dicaCaroll(p);
-
-    this._falando = true;
-    this.mostrarHUD(true);
-    this._falarUm(quem, texto).then(() => {
-      this._falando = false;
-      this.mostrarHUD(false);
-    });
-  },
-
   parar(ocultar = true) {
     if ('speechSynthesis' in window) speechSynthesis.cancel();
     this._fila = [];
     this._falando = false;
-    if (ocultar) this.ocultarHUD();
   }
 };
 
 const NaracaoEspaco = {
   narrar(texto, onFim) {
     const falas = TripulantesDialogos.finale();
-    TripulacaoNaracao.dialogo(falas, { manterHUD: true }).then(() => { if (onFim) onFim(); });
+    TripulacaoNaracao.dialogo(falas).then(() => { if (onFim) onFim(); });
   },
   parar() {
     TripulacaoNaracao.parar();

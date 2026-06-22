@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <div class="modo-card-icon">🚀</div>
               <div class="modo-card-content">
                 <h3>Sistema Solar</h3>
-                <p>Modo Exploração - Visite livremente!</p>
+                <p>Modo Exploração — mapa animado com fichas nos planetas</p>
                 <span class="modo-card-info">Sem regras</span>
               </div>
             </div>
@@ -575,16 +575,11 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="mapa-sistema" id="mapa-sistema">
             <div class="mapa-header">
               <h2>🚀 MODO EXPLORAÇÃO</h2>
-              <p>Explore o mapa ou toque nas fichas abaixo para ver dados de cada corpo celeste!</p>
+              <p>Passe o mouse sobre os corpos celestes — eles aumentam em movimento. Clique para abrir a ficha técnica.</p>
             </div>
             <div class="exploracao-wrapper" id="exploracao-wrapper">
               <div class="orbita-container" id="orbita-container"></div>
             </div>
-            <section class="exploracao-catalogo" id="exploracao-catalogo" aria-label="Fichas técnicas">
-              <h3 class="exploracao-catalogo-titulo">📋 Fichas Técnicas</h3>
-              <p class="exploracao-catalogo-sub">Sol, planetas e Lua — toque para ver informações completas</p>
-              <div class="exploracao-catalogo-grade" id="exploracao-catalogo-grade"></div>
-            </section>
             <div class="exploracao-painel" id="exploracao-painel"></div>
           </div>
           <footer class="planeta-rodape">
@@ -596,7 +591,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       this.criarEstrelas();
       this.criarOrbitasExploracao();
-      this.criarCatalogoExploracao();
 
       document.getElementById('explorar-voltar').addEventListener('click', () => {
         this.transicao(() => this.criarTelaInicial());
@@ -604,8 +598,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
       TripulacaoNaracao.definirContexto('exploracao');
       setTimeout(() => {
-        TripulacaoNaracao.dialogo(TripulantesDialogos.exploracao(), { manterHUD: true });
+        TripulacaoNaracao.dialogo(TripulantesDialogos.exploracao());
       }, 500);
+    },
+
+    registrarPlanetaExploracao(elemento, id, opcoes = {}) {
+      const p = planetas.find(pl => pl.id === id);
+      if (!elemento || !p) return;
+
+      elemento.classList.add('exploracao-ficha-link');
+      if (!opcoes.semPlanetaLink) {
+        elemento.classList.add('planeta-link');
+        if (opcoes.duracaoOrbita) {
+          elemento.classList.add('exploracao-orbita');
+          elemento.style.animationDuration = `${opcoes.duracaoOrbita}s`;
+        }
+      }
+      elemento.setAttribute('role', 'button');
+      elemento.setAttribute('tabindex', '0');
+      elemento.setAttribute('aria-label', `${p.nome} — ver ficha técnica`);
+
+      const abrir = (e) => {
+        if (opcoes.ignorarCliqueFilho && e.target.closest('.lua-companhia')) return;
+        e.stopPropagation();
+        e.preventDefault();
+        this.mostrarPainelExploracao(id);
+      };
+
+      elemento.addEventListener('click', abrir);
+      elemento.addEventListener('touchstart', () => elemento.classList.add('ativo-touch'), { passive: true });
+      elemento.addEventListener('touchend', (e) => {
+        abrir(e);
+        setTimeout(() => elemento.classList.remove('ativo-touch'), 400);
+      }, { passive: false });
+      elemento.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          abrir(e);
+        }
+      });
+    },
+
+    mostrarPainelExploracao(id) {
+      const p = planetas.find(pl => pl.id === id);
+      if (!p) return;
+      TripulacaoNaracao.definirContexto('exploracao', p);
+      const tamanhos = {
+        sol: 80, mercurio: 48, venus: 50, terra: 50, lua: 44, marte: 48,
+        jupiter: 56, saturno: 54, urano: 50, netuno: 50, plutao: 46
+      };
+      this.mostrarFichaPainel(p, this.obterLabelsFicha(), tamanhos, 'exploracao-painel');
     },
 
     criarOrbitasExploracao() {
@@ -648,14 +690,10 @@ document.addEventListener('DOMContentLoaded', () => {
       solWrapper.style.cssText = `position:absolute;top:50%;left:50%;width:0;height:0;transform:translate(-50%,-50%);z-index:10;`;
 
       const solEl = document.createElement('div');
-      solEl.className = 'corpo-celeste planeta sol planeta-link';
-      solEl.dataset.planeta = 'sol';
-      solEl.style.cssText = `position:absolute;top:50%;left:50%;width:${tamanhosSol}px;height:${tamanhosSol}px;cursor:pointer;`;
-      solEl.innerHTML = `${planetaArte('sol', tamanhosSol)}<span class="corpo-nome">Sol</span>`;
-      solEl.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.mostrarPainelExploracao('sol');
-      });
+      solEl.className = 'corpo-celeste planeta sol';
+      solEl.style.cssText = `position:absolute;top:50%;left:50%;width:${tamanhosSol}px;height:${tamanhosSol}px;`;
+      solEl.innerHTML = `${planetaArte('sol', tamanhosSol)}<span class="corpo-nome">${planetas.find(pl => pl.id === 'sol')?.nome || 'Sol'}</span>`;
+      this.registrarPlanetaExploracao(solEl, 'sol');
       solWrapper.appendChild(solEl);
       container.appendChild(solWrapper);
 
@@ -677,129 +715,30 @@ document.addEventListener('DOMContentLoaded', () => {
         planetaWrapper.style.cssText = `position:absolute;top:50%;left:50%;width:0;height:0;transform:translate(${Math.cos(rad) * orb.raio}px,${Math.sin(rad) * orb.raio}px);`;
 
         const planetaEl = document.createElement('div');
-        planetaEl.className = 'corpo-celeste planeta planeta-link';
-        planetaEl.dataset.planeta = id;
+        planetaEl.className = 'corpo-celeste planeta';
         planetaEl.style.cssText = `position:absolute;top:50%;left:50%;width:${tamanhos[id]}px;height:${tamanhos[id]}px;`;
 
         let html = planetaArte(id, tamanhos[id]);
         if (id === 'terra') {
-          html += `<div class="lua-companhia" data-planeta="lua" role="button" tabindex="0" aria-label="Lua">${planetaArte('lua', 16)}</div>`;
+          html += `<div class="lua-companhia" role="button" tabindex="0" aria-label="Lua — ver ficha técnica">${planetaArte('lua', 16)}<span class="lua-companhia-label">Lua</span></div>`;
         }
         html += `<span class="corpo-nome">${p.nome}</span>`;
         planetaEl.innerHTML = html;
 
-        planetaEl.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (e.target.closest('[data-planeta="lua"]')) {
-            this.mostrarPainelExploracao('lua');
-            return;
-          }
-          this.mostrarPainelExploracao(id);
+        this.registrarPlanetaExploracao(planetaEl, id, {
+          ignorarCliqueFilho: id === 'terra',
+          duracaoOrbita: orb.duracao
         });
 
         const luaEl = planetaEl.querySelector('.lua-companhia');
         if (luaEl) {
-          const abrirLua = (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            this.mostrarPainelExploracao('lua');
-          };
-          luaEl.addEventListener('click', abrirLua);
-          luaEl.addEventListener('touchend', abrirLua);
+          this.registrarPlanetaExploracao(luaEl, 'lua', { semPlanetaLink: true });
         }
 
         planetaWrapper.appendChild(planetaEl);
         orbita.appendChild(planetaWrapper);
         container.appendChild(orbita);
       });
-    },
-
-    criarCatalogoExploracao() {
-      const grade = document.getElementById('exploracao-catalogo-grade');
-      if (!grade) return;
-
-      const ordem = ['sol', 'mercurio', 'venus', 'terra', 'lua', 'marte', 'jupiter', 'saturno', 'urano', 'netuno', 'plutao'];
-      const tamanhos = { sol: 40, mercurio: 28, venus: 30, terra: 30, lua: 26, marte: 28, jupiter: 36, saturno: 34, urano: 30, netuno: 30, plutao: 26 };
-
-      ordem.forEach(id => {
-        const p = planetas.find(pl => pl.id === id);
-        if (!p) return;
-
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'exploracao-catalogo-item';
-        btn.style.borderColor = p.cor;
-        btn.innerHTML = `
-          ${planetaArte(id, tamanhos[id] || 28)}
-          <span class="exploracao-catalogo-nome" style="color:${p.cor}">${p.nome}</span>
-          <span class="exploracao-catalogo-tipo">${p.tipo}</span>
-        `;
-        btn.addEventListener('click', () => this.mostrarPainelExploracao(id));
-        grade.appendChild(btn);
-      });
-    },
-
-    mostrarPainelExploracao(id) {
-      const p = planetas.find(pl => pl.id === id);
-      if (!p) return;
-      const painel = document.getElementById('exploracao-painel');
-      if (!painel) return;
-
-      TripulacaoNaracao.definirContexto('exploracao', p);
-
-      const labels = this.obterLabelsFicha();
-
-      painel.innerHTML = `
-        <div class="exploracao-painel-overlay" id="exploracao-painel-fechar"></div>
-        <div class="exploracao-painel-conteudo" style="border-color: ${p.cor}">
-          <button class="btn-voltar btn-voltar--icone" id="exploracao-painel-fechar-btn" aria-label="Fechar">✕</button>
-          <div class="exploracao-painel-topo" style="background: radial-gradient(circle at center, ${p.cor}22 0%, transparent 70%)">
-            ${planetaArte(p.id, 80)}
-            <h2 style="color:${p.cor}">${p.nome}</h2>
-            <span class="painel-tipo">${p.tipo}</span>
-          </div>
-          <div class="painel-abas">
-            <button class="painel-aba ativa" data-paba="ficha">📋 Ficha Técnica</button>
-            <button class="painel-aba" data-paba="curiosidades">💡 Curiosidades</button>
-          </div>
-          <div class="painel-corpo">
-            <div class="painel-aba-conteudo ativa" id="paba-ficha">
-              <div class="painel-ficha">
-                ${Object.entries(p.ficha).map(([key, val]) => `
-                  <div class="painel-ficha-item">
-                    <span class="painel-ficha-label">${labels[key] || key}</span>
-                    <span class="painel-ficha-valor">${val}</span>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-            <div class="painel-aba-conteudo" id="paba-curiosidades">
-              <ul class="painel-curiosidades">
-                ${p.curiosidades.map(c => `<li class="painel-curiosidade-item">💫 ${c}</li>`).join('')}
-              </ul>
-            </div>
-          </div>
-        </div>
-      `;
-      painel.classList.add('ativo');
-
-      document.getElementById('exploracao-painel-fechar').addEventListener('click', () => this.fecharPainelExploracao());
-      document.getElementById('exploracao-painel-fechar-btn').addEventListener('click', () => this.fecharPainelExploracao());
-
-      document.querySelectorAll('.painel-aba').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.painel-aba').forEach(b => b.classList.remove('ativa'));
-          btn.classList.add('ativa');
-          document.querySelectorAll('.painel-aba-conteudo').forEach(c => c.classList.remove('ativa'));
-          const aba = document.getElementById(`paba-${btn.dataset.paba}`);
-          if (aba) aba.classList.add('ativa');
-        });
-      });
-    },
-
-    fecharPainelExploracao() {
-      const painel = document.getElementById('exploracao-painel');
-      if (painel) painel.classList.remove('ativo');
     },
 
     criarModoGaleria() {
@@ -870,13 +809,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     },
 
-    mostrarFichaPainel(p, labels, tamanhos) {
-      const painel = document.getElementById('galeria-painel');
+    mostrarFichaPainel(p, labels, tamanhos, painelId = 'galeria-painel') {
+      const painel = document.getElementById(painelId);
       if (!painel) return;
       const tam = tamanhos[p.id] || 60;
       painel.innerHTML = `
         <div class="painel-overlay" id="painel-fechar"></div>
-        <div class="painel-conteudo">
+        <div class="painel-conteudo" style="border-color: ${p.cor}44">
           <button class="btn-voltar btn-voltar--icone" id="painel-fechar-btn" aria-label="Fechar">✕</button>
           <div class="painel-topo" style="background: radial-gradient(circle at center, ${p.cor}22 0%, transparent 70%)">
             ${planetaArte(p.id, tam + 20)}
@@ -908,8 +847,9 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
       painel.classList.add('ativo');
 
-      document.getElementById('painel-fechar').addEventListener('click', () => this.fecharPainel());
-      document.getElementById('painel-fechar-btn').addEventListener('click', () => this.fecharPainel());
+      const fechar = () => this.fecharPainel(painelId);
+      document.getElementById('painel-fechar').addEventListener('click', fechar);
+      document.getElementById('painel-fechar-btn').addEventListener('click', fechar);
 
       document.querySelectorAll('.painel-aba').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -922,8 +862,8 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     },
 
-    fecharPainel() {
-      const painel = document.getElementById('galeria-painel');
+    fecharPainel(painelId = 'galeria-painel') {
+      const painel = document.getElementById(painelId);
       if (painel) painel.classList.remove('ativo');
     },
 
