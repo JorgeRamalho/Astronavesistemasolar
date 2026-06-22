@@ -37,3 +37,11 @@ Este repositório segue um fluxo simples, adequado a um projeto estático public
 | `0bc8b9d` | Mobile, tripulação narradora e modo exploração ampliado |
 | `66bcc29` | Página e link de acesso dedicado |
 | `b40fc89` | Correção de URLs com barras duplicadas no acesso dedicado |
+| `b5e4b08` | README do projeto na página do GitHub |
+
+## Commits em `docs/historico-registros` (documentação)
+
+| Commit | Descrição resumida |
+|--------|-------------------|
+| `2c6a942` | README, BRANCHES e HISTORICO-REGISTROS |
+| `481c3de` | Atualização de referência no histórico |
