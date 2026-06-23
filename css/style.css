@@ -133,6 +133,7 @@ body {
 
 .modo-card:nth-child(2) { animation-delay: 0.1s; }
 .modo-card:nth-child(3) { animation-delay: 0.2s; }
+.modo-card:nth-child(4) { animation-delay: 0.3s; }
 
 .modo-card:hover {
   background: rgba(255, 255, 255, 0.08);
@@ -1088,7 +1089,7 @@ body {
 }
 
 .exploracao-modo .mapa-sistema {
-  flex: 0 0 auto;
+  flex: 1;
   min-height: 0;
   padding: 20px;
   display: flex;

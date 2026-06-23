@@ -187,11 +187,19 @@ document.addEventListener('DOMContentLoaded', () => {
               </div>
             </div>
             <div class="modo-card" data-modo="exploracao">
-              <div class="modo-card-icon">🚀</div>
+              <div class="modo-card-icon">🪐</div>
               <div class="modo-card-content">
                 <h3>Sistema Solar</h3>
-                <p>Mapa animado, fichas nos planetas e galeria completa</p>
+                <p>Mapa animado — clique nos planetas em órbita</p>
                 <span class="modo-card-info">Sem regras</span>
+              </div>
+            </div>
+            <div class="modo-card" data-modo="galeria">
+              <div class="modo-card-icon">📋</div>
+              <div class="modo-card-content">
+                <h3>Modo Exploração</h3>
+                <p>Fichas técnicas e curiosidades de todos os planetas</p>
+                <span class="modo-card-info">${planetas.length} corpos celestes</span>
               </div>
             </div>
             <div class="modo-card modo-card-rede" data-modo="rede">
@@ -223,6 +231,8 @@ document.addEventListener('DOMContentLoaded', () => {
             this.transicao(() => this.criarTelaNovaJornada());
           } else if (modo === 'exploracao') {
             this.transicao(() => this.criarModoExploracao());
+          } else if (modo === 'galeria') {
+            this.transicao(() => this.criarModoGaleria());
           } else if (modo === 'rede') {
             this.transicao(() => this.criarTelaTesteRede());
           }
@@ -564,7 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="exploracao-modo">
           <div class="mapa-sistema" id="mapa-sistema">
             <div class="mapa-header">
-              <h2>🚀 MODO EXPLORAÇÃO</h2>
+              <h2>🪐 SISTEMA SOLAR</h2>
               <p>Passe o mouse sobre os corpos celestes — eles aumentam em movimento. Clique para abrir a ficha técnica.</p>
             </div>
             <div class="exploracao-wrapper" id="exploracao-wrapper">
@@ -572,13 +582,6 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <div class="exploracao-painel" id="exploracao-painel"></div>
           </div>
-          <section class="exploracao-galeria" id="exploracao-galeria" aria-label="Conheça os planetas">
-            <div class="galeria-header">
-              <h2>📡 Conheça os Planetas</h2>
-              <p>Navegue pelas fichas técnicas de todos os corpos celestes</p>
-            </div>
-            <div class="galeria-grade" id="galeria-grade"></div>
-          </section>
           <footer class="planeta-rodape">
             <button class="btn-voltar" id="explorar-voltar">Voltar ao Menu</button>
           </footer>
@@ -588,7 +591,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       this.criarEstrelas();
       this.criarOrbitasExploracao();
-      this.montarGaleriaPlanetas('exploracao-painel');
 
       document.getElementById('explorar-voltar').addEventListener('click', () => {
         this.transicao(() => this.criarTelaInicial());
@@ -739,7 +741,38 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     },
 
-    montarGaleriaPlanetas(painelId = 'exploracao-painel') {
+    criarModoGaleria() {
+      const main = document.getElementById('main-container');
+
+      main.innerHTML = `
+        <div class="galeria-modo" id="galeria-modo">
+          <div class="voltar-bar">
+            <button class="btn-voltar" id="galeria-voltar">Voltar ao Menu</button>
+          </div>
+          <div class="galeria-header">
+            <h2>🚀 MODO EXPLORAÇÃO</h2>
+            <p>Fichas técnicas e curiosidades de todos os corpos celestes</p>
+          </div>
+          <div class="galeria-grade" id="galeria-grade"></div>
+          <div class="galeria-painel" id="galeria-painel"></div>
+        </div>
+        <div class="estrelas-bg"></div>
+      `;
+
+      this.criarEstrelas();
+      this.montarGaleriaPlanetas('galeria-painel');
+
+      document.getElementById('galeria-voltar').addEventListener('click', () => {
+        this.transicao(() => this.criarTelaInicial());
+      });
+
+      TripulacaoNaracao.definirContexto('exploracao');
+      setTimeout(() => {
+        TripulacaoNaracao.dialogo(TripulantesDialogos.exploracao());
+      }, 500);
+    },
+
+    montarGaleriaPlanetas(painelId = 'galeria-painel') {
       const grade = document.getElementById('galeria-grade');
       if (!grade) return;
 
