@@ -1072,13 +1072,26 @@ body {
 }
 
 .exploracao-modo .mapa-sistema {
-  flex: 1;
+  flex: 0 0 auto;
   min-height: 0;
   padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.exploracao-galeria {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 10px 20px 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.exploracao-galeria .galeria-header {
+  margin-bottom: 20px;
 }
 
 .mapa-header {
