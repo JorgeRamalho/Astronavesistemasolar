@@ -52,4 +52,4 @@ Este repositório segue um fluxo simples, adequado a um projeto estático public
 | `9a16f91` | Linha do tempo com commits recentes de main |
 | `667c654` | Registro da rodada de exploração e tripulação voice-only |
 | `5905984` | Correção de hash na linha do tempo |
-| `7b1c33b` | Registro da galeria no Sistema Solar e selo Novo Game |
+| `afbd975` | Registro da galeria no Sistema Solar e selo Novo Game |

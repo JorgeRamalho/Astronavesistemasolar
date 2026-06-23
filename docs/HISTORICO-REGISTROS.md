@@ -390,7 +390,7 @@ A sessão concentrou-se em:
 | `481c3de` | `docs: atualiza hash de referencia no historico de registros` |
 | `9a16f91` | `docs: inclui commits recentes de main e desta branch na linha do tempo` |
 | `667c654` | `docs: registra refinamento do modo exploracao e tripulacao voice-only` |
-| `7b1c33b` | `docs: registra galeria no Sistema Solar e selo Novo Game` |
+| `afbd975` | `docs: registra galeria no Sistema Solar e selo Novo Game` |
 
 ---
 
