@@ -16,6 +16,8 @@ A sessão concentrou-se em:
 3. Evolução do **modo exploração** com fichas técnicas.
 4. **Tripulação narradora** com voz (Alexis e Caroll).
 5. **Publicação web** com link online, rede local e acesso dedicado.
+6. Refinamento do **modo exploração** — fichas no mapa animado, hover em órbita.
+7. **Tripulação voice-only** — narração por voz sem HUD visual.
 
 ---
 
@@ -247,6 +249,79 @@ A sessão concentrou-se em:
 
 ---
 
+### 20. Fichas técnicas no mapa (sem catálogo abaixo)
+
+**Pedido:** Abrir fichas ao clicar nos corpos celestes do mapa; remover grade de fichas abaixo.
+
+**Alterações:**
+- `js/main.js` — removidos `criarCatalogoExploracao()` e seção HTML do catálogo; clique abre painel via `mostrarPainelExploracao()`.
+- `css/style.css` — removidos estilos `.exploracao-catalogo*`.
+
+**Commit relacionado em `main`:** `bac3e5f`
+
+---
+
+### 21. Modo Exploração — hover e texto orientativo
+
+**Pedido:** Mapa animado com nomes ocultos até hover/toque; instruções claras no header.
+
+**Alterações:**
+- `js/main.js` — textos do card e header atualizados; nomes nos corpos sem rótulo “📋 Ficha”.
+- `css/style.css` — `.corpo-nome` oculto por padrão, visível em `:hover` e `.ativo-touch`.
+
+**Commit relacionado em `main`:** `bac3e5f`
+
+---
+
+### 22. Remoção da pausa de órbitas no hover
+
+**Pedido:** Manter animação contínua; não pausar órbitas ao passar o mouse.
+
+**Alterações:**
+- `js/main.js` — removida `configurarPausaOrbitasExploracao()`.
+- `css/style.css` — removido `.exploracao-wrapper.pausado`.
+
+**Commit relacionado em `main`:** `bac3e5f`
+
+---
+
+### 23. Planetas como links com contra-rotação em órbita
+
+**Pedido:** Interação igual ao Sol durante movimento orbital; Lua clicável separada da Terra.
+
+**Alterações:**
+- `js/main.js` — `registrarPlanetaExploracao()` com suporte a teclado, touch e `ignorarCliqueFilho` (Lua).
+- `css/style.css` — classes `exploracao-ficha-link`, `exploracao-orbita`, animação `exploracao-contrarrotar`, zoom em `.planeta-arte`.
+
+**Commit relacionado em `main`:** `bac3e5f`
+
+---
+
+### 24. Tripulação — narração só por voz (sem HUD)
+
+**Pedido:** Remover balão, avatares e HUD; manter TTS da Alexis e Caroll.
+
+**Alterações:**
+- `js/audio.js` — `TripulacaoNaracao` simplificado: sem `_montarHUD` completo, sem balão nem interação por avatar.
+- `css/style.css` — removidos estilos `.tripulantes-hud*`, `.trip-balao`, `.trip-texto`.
+
+**Commit relacionado em `main`:** `ee263c0`
+
+---
+
+### 25. Botão de narração no container de som
+
+**Pedido:** Controle 🗣️ ao lado do botão de música ambiente.
+
+**Alterações:**
+- `index.html` — `#trip-toggle-narracao` em `#btn-som-container`.
+- `js/audio.js` — toggle vinculado ao botão fixo da página.
+- `css/style.css` — estilo `.btn-narracao`.
+
+**Commit relacionado em `main`:** `ee263c0`
+
+---
+
 ## Arquivos criados na sessão
 
 | Arquivo | Função |
@@ -265,11 +340,23 @@ A sessão concentrou-se em:
 
 ---
 
+## Commits em `main` (rodada de refinamento)
+
+| Hash | Mensagem |
+|------|----------|
+| `bac3e5f` | `feat(exploracao): fichas interativas no mapa com hover em orbita` |
+| `ee263c0` | `refactor(tripulacao): remove HUD visual e mantem narracao por voz` |
+
+---
+
 ## Commits desta branch
 
 | Hash | Mensagem |
 |------|----------|
 | `2c6a942` | `docs: adiciona README e historico profissional de desenvolvimento` |
+| `481c3de` | `docs: atualiza hash de referencia no historico de registros` |
+| `9a16f91` | `docs: inclui commits recentes de main e desta branch na linha do tempo` |
+| `667c654` | `docs: registra refinamento do modo exploracao e tripulacao voice-only` |
 
 ---
 

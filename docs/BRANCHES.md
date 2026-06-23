@@ -38,6 +38,8 @@ Este repositório segue um fluxo simples, adequado a um projeto estático public
 | `66bcc29` | Página e link de acesso dedicado |
 | `b40fc89` | Correção de URLs com barras duplicadas no acesso dedicado |
 | `b5e4b08` | README do projeto na página do GitHub |
+| `bac3e5f` | Fichas interativas no mapa de exploração com hover em órbita |
+| `ee263c0` | Tripulação voice-only — narração sem HUD visual |
 
 ## Commits em `docs/historico-registros` (documentação)
 
@@ -45,3 +47,5 @@ Este repositório segue um fluxo simples, adequado a um projeto estático public
 |--------|-------------------|
 | `2c6a942` | README, BRANCHES e HISTORICO-REGISTROS |
 | `481c3de` | Atualização de referência no histórico |
+| `9a16f91` | Linha do tempo com commits recentes de main |
+| `667c654` | Registro da rodada de exploração e tripulação voice-only |
