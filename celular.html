@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Abrir no Celular — Viagem Sistema Solar</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0a0a1a;
+      color: #e8e8f0;
+      min-height: 100vh;
+      padding: 24px 16px 40px;
+      text-align: center;
+    }
+    h1 {
+      color: #FDB813;
+      font-size: 1.35rem;
+      letter-spacing: 1px;
+      margin: 12px 0 6px;
+    }
+    .sub {
+      color: #8899bb;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    .opcao {
+      max-width: 400px;
+      margin: 0 auto 28px;
+      padding: 20px 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      text-align: left;
+    }
+    .opcao.destaque {
+      border-color: rgba(253, 184, 19, 0.45);
+      background: rgba(253, 184, 19, 0.06);
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #0a0a1a;
+      background: linear-gradient(135deg, #FDB813, #FF6B00);
+      padding: 3px 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+    .opcao h2 {
+      font-size: 1rem;
+      color: #FDB813;
+      margin-bottom: 8px;
+    }
+    .opcao p {
+      font-size: 0.85rem;
+      color: #8899bb;
+      margin-bottom: 12px;
+      line-height: 1.45;
+    }
+    .link-btn {
+      display: block;
+      word-break: break-all;
+      padding: 14px;
+      background: rgba(126, 200, 227, 0.15);
+      border: 2px solid rgba(126, 200, 227, 0.4);
+      border-radius: 12px;
+      color: #7EC8E3;
+      font-family: monospace;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-decoration: none;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .link-btn:hover { background: rgba(126, 200, 227, 0.25); }
+    .qr {
+      display: flex;
+      justify-content: center;
+      margin: 12px 0;
+    }
+    .qr-wrap {
+      background: #fff;
+      padding: 12px;
+      border-radius: 12px;
+      display: inline-block;
+    }
+    .btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+    .btn-copiar {
+      background: linear-gradient(135deg, #7EC8E3, #4a90d9);
+      color: #0a0a1a;
+    }
+    .btn-abrir {
+      background: linear-gradient(135deg, #FDB813, #FF6B00);
+      color: #0a0a1a;
+      text-decoration: none;
+      display: block;
+      text-align: center;
+      margin-top: 8px;
+    }
+    .status { font-size: 0.85rem; color: #6fcf6f; min-height: 1.2em; margin-top: 8px; text-align: center; }
+    .erro { color: #ff8888; font-size: 0.85rem; }
+    .passos {
+      font-size: 0.8rem;
+      color: #667;
+      margin-top: 24px;
+      line-height: 1.6;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: left;
+    }
+    .passos strong { color: #8899bb; }
+  </style>
+</head>
+<body>
+  <div style="font-size:48px">📱</div>
+  <h1>Abrir no Celular ou Tablet</h1>
+  <p class="sub">Escolha uma opção abaixo. A mais fácil funciona de qualquer lugar com internet.</p>
+
+  <section class="opcao destaque">
+    <span class="badge">Recomendado</span>
+    <h2>🌐 Site na internet</h2>
+    <p>Funciona em qualquer rede (Wi‑Fi ou dados móveis). Não precisa do computador ligado.</p>
+    <a class="link-btn" id="link-online" href="https://jorgeramalho.github.io/Astronavesistemasolar/">jorgeramalho.github.io/Astronavesistemasolar</a>
+    <div class="qr"><div class="qr-wrap" id="qr-online"></div></div>
+    <button type="button" class="btn btn-copiar" id="copiar-online">📋 Copiar link</button>
+    <a class="btn btn-abrir" id="abrir-online" href="https://jorgeramalho.github.io/Astronavesistemasolar/">Abrir jogo agora ↗</a>
+    <p class="status" id="status-online"></p>
+  </section>
+
+  <section class="opcao" id="secao-rede">
+    <h2>🏠 Mesma Wi‑Fi (teste local)</h2>
+    <p>Só funciona com o PC ligado e <strong>start-teste.bat</strong> aberto. Celular na mesma rede Wi‑Fi.</p>
+    <div id="rede-conteudo">
+      <p class="sub">Carregando link da rede…</p>
+    </div>
+  </section>
+
+  <div class="passos">
+    <strong>Se não abrir no celular:</strong><br>
+    1. Use a opção <strong>Site na internet</strong> (acima).<br>
+    2. Digite o link completo com <strong>https://</strong>.<br>
+    3. Teste local: execute <strong>liberar-firewall.bat</strong> como administrador, depois <strong>start-teste.bat</strong>.<br>
+    4. PC e celular na mesma Wi‑Fi (não use rede de convidados).
+  </div>
+
+  <script src="js/qrcode-lib.js"></script>
+  <script>
+    const URL_ONLINE = 'https://jorgeramalho.github.io/Astronavesistemasolar/';
+
+    function renderizarQr(el, url) {
+      if (typeof qrcode !== 'function') {
+        el.innerHTML = '<p style="color:#999;font-size:12px;padding:16px">QR indisponível</p>';
+        return;
+      }
+      try {
+        const qr = qrcode(0, 'M');
+        qr.addData(url);
+        qr.make();
+        el.innerHTML = qr.createSvgTag(5, 0);
+      } catch {
+        el.innerHTML = '<p style="color:#999;font-size:12px;padding:16px">QR indisponível</p>';
+      }
+    }
+
+    async function copiar(texto, statusEl) {
+      try {
+        await navigator.clipboard.writeText(texto);
+        if (statusEl) statusEl.textContent = '✅ Link copiado!';
+        return true;
+      } catch {
+        const ta = document.createElement('textarea');
+        ta.value = texto;
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        ta.remove();
+        if (statusEl) statusEl.textContent = ok ? '✅ Link copiado!' : 'Copie o link manualmente.';
+        return ok;
+      }
+    }
+
+    renderizarQr(document.getElementById('qr-online'), URL_ONLINE);
+    document.getElementById('copiar-online').addEventListener('click', () => {
+      copiar(URL_ONLINE, document.getElementById('status-online'));
+    });
+
+    async function carregarRede() {
+      const box = document.getElementById('rede-conteudo');
+      let info = null;
+
+      const bases = ['/api/rede-info', 'http://127.0.0.1:8765/api/rede-info', 'http://localhost:8765/api/rede-info'];
+      for (const url of bases) {
+        try {
+          const r = await fetch(url, { cache: 'no-store' });
+          if (r.ok) { info = await r.json(); break; }
+        } catch {}
+      }
+
+      if (!info?.primary) {
+        box.innerHTML = '<p class="erro">Servidor local não detectado.<br>Execute <strong>start-teste.bat</strong> no PC e recarregue esta página.<br><br>Se já executou, rode <strong>liberar-firewall.bat</strong> como administrador.</p>';
+        return;
+      }
+
+      const url = info.primary;
+      box.innerHTML = `
+        <a class="link-btn" href="${url}">${url.replace(/^https?:\/\//, '')}</a>
+        <div class="qr"><div class="qr-wrap" id="qr-rede"></div></div>
+        <button type="button" class="btn btn-copiar" id="copiar-rede">📋 Copiar link da rede</button>
+        <p class="status" id="status-rede">Escaneie com a câmera do celular</p>
+      `;
+      renderizarQr(document.getElementById('qr-rede'), url);
+      document.getElementById('copiar-rede').addEventListener('click', () => {
+        copiar(url, document.getElementById('status-rede'));
+      });
+    }
+
+    carregarRede();
+  </script>
+</body>
+</html>

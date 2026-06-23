@@ -21,6 +21,14 @@ if errorlevel 1 (
 echo  Iniciando servidor na porta 8765...
 echo  O navegador abrira com o link e QR Code.
 echo.
+echo  IMPORTANTE — primeiro acesso no celular:
+echo    1. Clique direito em liberar-firewall.bat ^> Executar como administrador
+echo    2. Depois mantenha esta janela aberta
+echo    3. No celular abra: celular.html ou escaneie o QR Code
+echo.
+echo  Ou use o site online (qualquer rede):
+echo    https://jorgeramalho.github.io/Astronavesistemasolar/
+echo.
 echo  Mantenha esta janela aberta enquanto testa.
 echo  Pressione Ctrl+C para parar.
 echo.

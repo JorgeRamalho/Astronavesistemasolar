@@ -113,7 +113,8 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`  Porta: ${PORT}\n`);
   console.log('  No computador:');
   console.log(`    → ${info.localhost}`);
-  console.log(`    → ${info.rede}  (link + QR Code)\n`);
+  console.log(`    → ${info.rede}  (link + QR Code)`);
+    console.log(`    → http://localhost:${PORT}/celular.html  (guia celular)\n`);
 
   if (info.links.length) {
     console.log('  📱 No celular/tablet (mesma Wi‑Fi):');
@@ -130,11 +131,12 @@ server.listen(PORT, '0.0.0.0', () => {
   }
 
   if (process.env.ABRIR_NAVEGADOR !== '0') {
+    const abrirCelular = `http://localhost:${PORT}/celular.html`;
     const abrir = process.platform === 'win32'
-      ? `start "" "${info.rede}"`
+      ? `start "" "${abrirCelular}"`
       : process.platform === 'darwin'
-        ? `open "${info.rede}"`
-        : `xdg-open "${info.rede}"`;
+        ? `open "${abrirCelular}"`
+        : `xdg-open "${abrirCelular}"`;
     setTimeout(() => exec(abrir, () => {}), 800);
   }
 });
