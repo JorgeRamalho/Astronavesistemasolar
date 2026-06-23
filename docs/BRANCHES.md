@@ -40,6 +40,8 @@ Este repositório segue um fluxo simples, adequado a um projeto estático public
 | `b5e4b08` | README do projeto na página do GitHub |
 | `bac3e5f` | Fichas interativas no mapa de exploração com hover em órbita |
 | `ee263c0` | Tripulação voice-only — narração sem HUD visual |
+| `8a7a41b` | Galeria integrada ao modo Sistema Solar |
+| `c13cfc5` | Selo Novo Game no card Viagem Espacial |
 
 ## Commits em `docs/historico-registros` (documentação)
 
@@ -49,3 +51,5 @@ Este repositório segue um fluxo simples, adequado a um projeto estático public
 | `481c3de` | Atualização de referência no histórico |
 | `9a16f91` | Linha do tempo com commits recentes de main |
 | `667c654` | Registro da rodada de exploração e tripulação voice-only |
+| `5905984` | Correção de hash na linha do tempo |
+| `7b1c33b` | Registro da galeria no Sistema Solar e selo Novo Game |

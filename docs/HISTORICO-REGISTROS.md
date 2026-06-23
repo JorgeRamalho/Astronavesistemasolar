@@ -18,6 +18,8 @@ A sessão concentrou-se em:
 5. **Publicação web** com link online, rede local e acesso dedicado.
 6. Refinamento do **modo exploração** — fichas no mapa animado, hover em órbita.
 7. **Tripulação voice-only** — narração por voz sem HUD visual.
+8. **Reorganização do menu** — galeria “Conheça os Planetas” dentro do Sistema Solar.
+9. **Selo Novo Game** no card Viagem Espacial da tela inicial.
 
 ---
 
@@ -322,6 +324,30 @@ A sessão concentrou-se em:
 
 ---
 
+### 26. Galeria integrada ao modo Sistema Solar
+
+**Pedido:** Retirar “Conheça os Planetas” da tela inicial e colocar dentro do Sistema Solar.
+
+**Alterações:**
+- `js/main.js` — removido card `data-modo="galeria"` do menu; seção `.exploracao-galeria` abaixo do mapa; `criarModoGaleria()` substituída por `montarGaleriaPlanetas()`.
+- `css/style.css` — estilos `.exploracao-galeria`; ajuste de layout do mapa (`flex: 0 0 auto`).
+
+**Commit relacionado em `main`:** `8a7a41b`
+
+---
+
+### 27. Selo “Novo Game” em Viagem Espacial
+
+**Pedido:** Adicionar título/destaque “Novo Game” no botão Viagem Espacial da tela principal.
+
+**Alterações:**
+- `js/main.js` — `<span class="modo-card-novo">Novo Game</span>` no card da aventura.
+- `css/style.css` — estilo `.modo-card-novo` (selo amarelo/laranja).
+
+**Commit relacionado em `main`:** `c13cfc5`
+
+---
+
 ## Arquivos criados na sessão
 
 | Arquivo | Função |
@@ -347,6 +373,13 @@ A sessão concentrou-se em:
 | `bac3e5f` | `feat(exploracao): fichas interativas no mapa com hover em orbita` |
 | `ee263c0` | `refactor(tripulacao): remove HUD visual e mantem narracao por voz` |
 
+## Commits em `main` (reorganização do menu)
+
+| Hash | Mensagem |
+|------|----------|
+| `8a7a41b` | `refactor(ui): integra galeria ao modo Sistema Solar` |
+| `c13cfc5` | `feat(menu): adiciona selo Novo Game em Viagem Espacial` |
+
 ---
 
 ## Commits desta branch
@@ -357,6 +390,7 @@ A sessão concentrou-se em:
 | `481c3de` | `docs: atualiza hash de referencia no historico de registros` |
 | `9a16f91` | `docs: inclui commits recentes de main e desta branch na linha do tempo` |
 | `667c654` | `docs: registra refinamento do modo exploracao e tripulacao voice-only` |
+| `7b1c33b` | `docs: registra galeria no Sistema Solar e selo Novo Game` |
 
 ---
 
