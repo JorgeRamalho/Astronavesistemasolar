@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="modo-card" data-modo="aventura">
               <div class="modo-card-icon">👨‍🚀</div>
               <div class="modo-card-content">
-                <h3>Viagem Espacial</h3>
+                <h3>Viagem Espacial <span class="modo-card-novo">Novo Game</span></h3>
                 <p>Inicie uma nova viagem pelo Sistema Solar!</p>
                 <span class="modo-card-info">${this.jornadaOrdem.length} paradas</span>
               </div>
