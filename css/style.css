@@ -157,6 +157,22 @@ body {
   color: #FDB813;
   margin-bottom: 3px;
   letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.modo-card-novo {
+  font-size: 9px;
+  font-weight: 700;
+  color: #0a0e1a;
+  background: linear-gradient(135deg, #FDB813, #FF6B00);
+  padding: 2px 8px;
+  border-radius: 6px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  line-height: 1.4;
 }
 
 .modo-card-content p {
@@ -1072,13 +1088,26 @@ body {
 }
 
 .exploracao-modo .mapa-sistema {
-  flex: 1;
+  flex: 0 0 auto;
   min-height: 0;
   padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.exploracao-galeria {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 10px 20px 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.exploracao-galeria .galeria-header {
+  margin-bottom: 20px;
 }
 
 .mapa-header {

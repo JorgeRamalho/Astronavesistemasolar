@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="modo-card" data-modo="aventura">
               <div class="modo-card-icon">👨‍🚀</div>
               <div class="modo-card-content">
-                <h3>Viagem Espacial</h3>
+                <h3>Viagem Espacial <span class="modo-card-novo">Novo Game</span></h3>
                 <p>Inicie uma nova viagem pelo Sistema Solar!</p>
                 <span class="modo-card-info">${this.jornadaOrdem.length} paradas</span>
               </div>
@@ -190,16 +190,8 @@ document.addEventListener('DOMContentLoaded', () => {
               <div class="modo-card-icon">🚀</div>
               <div class="modo-card-content">
                 <h3>Sistema Solar</h3>
-                <p>Modo Exploração — mapa animado com fichas nos planetas</p>
+                <p>Mapa animado, fichas nos planetas e galeria completa</p>
                 <span class="modo-card-info">Sem regras</span>
-              </div>
-            </div>
-            <div class="modo-card" data-modo="galeria">
-              <div class="modo-card-icon">📡</div>
-              <div class="modo-card-content">
-                <h3>Conheça os Planetas</h3>
-                <p>Modo Galeria - Navegue pelas fichas técnicas!</p>
-                <span class="modo-card-info">${planetas.length} planetas</span>
               </div>
             </div>
             <div class="modo-card modo-card-rede" data-modo="rede">
@@ -231,8 +223,6 @@ document.addEventListener('DOMContentLoaded', () => {
             this.transicao(() => this.criarTelaNovaJornada());
           } else if (modo === 'exploracao') {
             this.transicao(() => this.criarModoExploracao());
-          } else if (modo === 'galeria') {
-            this.transicao(() => this.criarModoGaleria());
           } else if (modo === 'rede') {
             this.transicao(() => this.criarTelaTesteRede());
           }
@@ -582,6 +572,13 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <div class="exploracao-painel" id="exploracao-painel"></div>
           </div>
+          <section class="exploracao-galeria" id="exploracao-galeria" aria-label="Conheça os planetas">
+            <div class="galeria-header">
+              <h2>📡 Conheça os Planetas</h2>
+              <p>Navegue pelas fichas técnicas de todos os corpos celestes</p>
+            </div>
+            <div class="galeria-grade" id="galeria-grade"></div>
+          </section>
           <footer class="planeta-rodape">
             <button class="btn-voltar" id="explorar-voltar">Voltar ao Menu</button>
           </footer>
@@ -591,6 +588,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       this.criarEstrelas();
       this.criarOrbitasExploracao();
+      this.montarGaleriaPlanetas('exploracao-painel');
 
       document.getElementById('explorar-voltar').addEventListener('click', () => {
         this.transicao(() => this.criarTelaInicial());
@@ -741,35 +739,18 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     },
 
-    criarModoGaleria() {
-      const main = document.getElementById('main-container');
-      const labels = {
-        diametro: 'Diâmetro', massa: 'Massa', temperatura: 'Temperatura',
-        idade: 'Idade', tipo: 'Tipo', composicao: 'Composição',
-        distanciaSol: 'Distância do Sol', periodoOrbital: 'Período Orbital',
-        distanciaTerra: 'Distância da Terra', descoberta: 'Descoberta'
+    montarGaleriaPlanetas(painelId = 'exploracao-painel') {
+      const grade = document.getElementById('galeria-grade');
+      if (!grade) return;
+
+      const labels = this.obterLabelsFicha();
+      const ordemGaleria = ['sol', 'mercurio', 'venus', 'terra', 'lua', 'marte', 'jupiter', 'saturno', 'urano', 'netuno', 'plutao'];
+      const tamanhos = {
+        sol: 72, mercurio: 26, venus: 32, terra: 32, lua: 24, marte: 26,
+        jupiter: 44, saturno: 38, urano: 32, netuno: 32, plutao: 24
       };
 
-      main.innerHTML = `
-        <div class="galeria-modo" id="galeria-modo">
-          <div class="voltar-bar">
-            <button class="btn-voltar" id="galeria-voltar">Voltar ao Menu</button>
-          </div>
-          <div class="galeria-header">
-            <h2>📡 GALERIA DO SISTEMA SOLAR</h2>
-            <p>Navegue pelas fichas técnicas de todos os corpos celestes</p>
-          </div>
-          <div class="galeria-grade" id="galeria-grade"></div>
-          <div class="galeria-painel" id="galeria-painel"></div>
-        </div>
-        <div class="estrelas-bg"></div>
-      `;
-
-      this.criarEstrelas();
-      const grade = document.getElementById('galeria-grade');
-
-      const ordemGaleria = ['sol','mercurio','venus','terra','lua','marte','jupiter','saturno','urano','netuno','plutao'];
-      const tamanhos = { sol: 72, mercurio: 26, venus: 32, terra: 32, lua: 24, marte: 26, jupiter: 44, saturno: 38, urano: 32, netuno: 32, plutao: 24 };
+      grade.innerHTML = '';
 
       ordemGaleria.forEach(id => {
         const p = planetas.find(pl => pl.id === id);
@@ -795,18 +776,13 @@ document.addEventListener('DOMContentLoaded', () => {
         card.addEventListener('click', (e) => {
           if (id === 'terra' && e.target.closest('.lua-orbita')) {
             const luaData = planetas.find(pl => pl.id === 'lua');
-            if (luaData) this.mostrarFichaPainel(luaData, labels, tamanhos);
+            if (luaData) this.mostrarFichaPainel(luaData, labels, tamanhos, painelId);
             return;
           }
-          this.mostrarFichaPainel(p, labels, tamanhos);
+          this.mostrarFichaPainel(p, labels, tamanhos, painelId);
         });
         grade.appendChild(card);
       });
-
-      document.getElementById('galeria-voltar').addEventListener('click', () => {
-        this.transicao(() => this.criarTelaInicial());
-      });
-
     },
 
     mostrarFichaPainel(p, labels, tamanhos, painelId = 'galeria-painel') {
