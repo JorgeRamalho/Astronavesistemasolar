@@ -322,14 +322,14 @@ const Jogos = {
       ctx.fill();
       ctx.restore();
 
-      if (Math.random() < 0.04) {
+      if (Math.random() < 0.02) {
         const ang = Math.random() * Math.PI * 2;
         flares.push({
           x: 200 + Math.cos(ang) * 70,
           y: 140 + Math.sin(ang) * 70,
-          vx: Math.cos(ang) * (1 + Math.random() * 2),
-          vy: Math.sin(ang) * (1 + Math.random() * 2),
-          tamanho: 8 + Math.random() * 14,
+          vx: Math.cos(ang) * (0.5 + Math.random()),
+          vy: Math.sin(ang) * (0.5 + Math.random()),
+          tamanho: 6 + Math.random() * 10,
           vida: 80 + Math.random() * 40
         });
       }
@@ -350,17 +350,17 @@ const Jogos = {
         return f.vida > 0 && f.x > -50 && f.x < this.canvasW + 50 && f.y > -50 && f.y < this.canvasH + 50;
       });
 
-      if (this.teclasPressionadas['w'] || this.teclasPressionadas['W'] || this.teclasPressionadas['ArrowUp']) nave.y -= 3;
-      if (this.teclasPressionadas['s'] || this.teclasPressionadas['S'] || this.teclasPressionadas['ArrowDown']) nave.y += 3;
-      if (this.teclasPressionadas['a'] || this.teclasPressionadas['A'] || this.teclasPressionadas['ArrowLeft']) nave.x -= 3;
-      if (this.teclasPressionadas['d'] || this.teclasPressionadas['D'] || this.teclasPressionadas['ArrowRight']) nave.x += 3;
+      if (this.teclasPressionadas['w'] || this.teclasPressionadas['W'] || this.teclasPressionadas['ArrowUp']) nave.y -= 4;
+      if (this.teclasPressionadas['s'] || this.teclasPressionadas['S'] || this.teclasPressionadas['ArrowDown']) nave.y += 4;
+      if (this.teclasPressionadas['a'] || this.teclasPressionadas['A'] || this.teclasPressionadas['ArrowLeft']) nave.x -= 4;
+      if (this.teclasPressionadas['d'] || this.teclasPressionadas['D'] || this.teclasPressionadas['ArrowRight']) nave.x += 4;
       nave.x = Math.max(18, Math.min(this.canvasW - 18, nave.x));
       nave.y = Math.max(18, Math.min(this.canvasH - 18, nave.y));
 
       for (const f of flares) {
         const dx = nave.x - f.x;
         const dy = nave.y - f.y;
-        if (Math.sqrt(dx * dx + dy * dy) < f.tamanho + 12) {
+        if (Math.sqrt(dx * dx + dy * dy) < f.tamanho + 8) {
           ativo = false;
           this.finalizarJogo(container, false, 'Sua nave foi atingida por uma erupção solar!');
           return;
@@ -430,9 +430,9 @@ const Jogos = {
       }
       ctx.setLineDash([]);
 
-      velocidade = Math.min(8, 4 + (desafio.duracao - tempoRestante) / 8);
+      velocidade = Math.min(5, 3 + (desafio.duracao - tempoRestante) / 20);
 
-      if (Math.random() < 0.015 * (velocidade / 4)) {
+      if (Math.random() < 0.008 * (velocidade / 4)) {
         const faixa = Math.floor(Math.random() * 3);
         obstaculos.push({
           faixa: faixa,
@@ -471,7 +471,7 @@ const Jogos = {
 
       const naveX = faixas[faixaAtual];
       for (const o of obstaculos) {
-        if (o.faixa === faixaAtual && o.y > 350 && o.y < 450) {
+        if (o.faixa === faixaAtual && o.y > 380 && o.y < 420) {
           ativo = false;
           this.finalizarJogo(container, false, 'Colisão em Mercúrio! Muito rápido!');
           return;
@@ -519,23 +519,24 @@ const Jogos = {
     let tempoRestante = desafio.duracao;
     let ativo = true;
     let score = 0;
+    const metaPontos = desafio.metaPontos || 8;
 
     const loop = () => {
       if (!ativo) return;
       this.desenharBackground(ctx, '#2a1000', '#1a0800');
 
-      if (Math.random() < 0.03) {
-        const larg = 60 + Math.random() * 80;
+      if (Math.random() < 0.02) {
+        const larg = 70 + Math.random() * 90;
         plataformas.push({
           x: Math.random() * (this.canvasW - larg),
           y: -20,
           larg: larg,
-          tipo: Math.random() < 0.3 ? 'perigo' : 'normal'
+          tipo: Math.random() < 0.12 ? 'perigo' : 'normal'
         });
       }
 
       plataformas = plataformas.filter(p => {
-        p.y += 2;
+        p.y += 1.5;
         if (p.tipo === 'perigo') {
           ctx.fillStyle = 'rgba(255,50,0,0.6)';
           ctx.shadowColor = '#ff3300';
@@ -552,10 +553,10 @@ const Jogos = {
         return p.y < this.canvasH + 20;
       });
 
-      if (this.teclasPressionadas['ArrowLeft'] || this.teclasPressionadas['a'] || this.teclasPressionadas['A']) nave.x -= 3;
-      if (this.teclasPressionadas['ArrowRight'] || this.teclasPressionadas['d'] || this.teclasPressionadas['D']) nave.x += 3;
-      if (this.teclasPressionadas['ArrowUp'] || this.teclasPressionadas['w'] || this.teclasPressionadas['W']) nave.y -= 3;
-      if (this.teclasPressionadas['ArrowDown'] || this.teclasPressionadas['s'] || this.teclasPressionadas['S']) nave.y += 2;
+      if (this.teclasPressionadas['ArrowLeft'] || this.teclasPressionadas['a'] || this.teclasPressionadas['A']) nave.x -= 4;
+      if (this.teclasPressionadas['ArrowRight'] || this.teclasPressionadas['d'] || this.teclasPressionadas['D']) nave.x += 4;
+      if (this.teclasPressionadas['ArrowUp'] || this.teclasPressionadas['w'] || this.teclasPressionadas['W']) nave.y -= 4;
+      if (this.teclasPressionadas['ArrowDown'] || this.teclasPressionadas['s'] || this.teclasPressionadas['S']) nave.y += 2.5;
       nave.x = Math.max(10, Math.min(this.canvasW - 10, nave.x));
       nave.y = Math.max(10, Math.min(this.canvasH - 10, nave.y));
 
@@ -563,9 +564,8 @@ const Jogos = {
       for (const p of plataformas) {
         if (nave.x > p.x && nave.x < p.x + p.larg && nave.y > p.y - 8 && nave.y < p.y + 16) {
           if (p.tipo === 'perigo') {
-            ativo = false;
-            this.finalizarJogo(container, false, 'Calor extremo de Vênus!');
-            return;
+            nave.y -= 8;
+            break;
           }
           emPlataforma = true;
           score++;
@@ -594,7 +594,7 @@ const Jogos = {
 
       if (tempoRestante <= 0) {
         ativo = false;
-        this.finalizarJogo(container, score > 30, score > 30 ? `Escapou de Vênus com ${score} pontos!` : `Só ${score} pontos. Tente novamente!`);
+        this.finalizarJogo(container, score >= metaPontos, score >= metaPontos ? `Escapou de Vênus com ${score} pontos!` : `Quase lá! ${score}/${metaPontos} pontos. Tente novamente!`);
         return;
       }
       tempoRestante -= 1 / 60;
@@ -634,31 +634,31 @@ const Jogos = {
       ctx.stroke();
       ctx.restore();
 
-      if (Math.random() < 0.065) {
+      if (Math.random() < 0.03) {
         const roll = Math.random();
         if (roll < 0.4) {
           itens.push({
             x: Math.random() * (this.canvasW - 20) + 10,
             y: -20,
             tipo: 'anel',
-            tamanho: 12 + Math.random() * 10,
-            vy: 1.2 + Math.random() * 1.8
+            tamanho: 10 + Math.random() * 8,
+            vy: 0.8 + Math.random() * 0.9
           });
         } else if (roll < 0.7) {
           itens.push({
             x: Math.random() * (this.canvasW - 20) + 10,
             y: -20,
             tipo: 'meteoro',
-            tamanho: 10 + Math.random() * 12,
-            vy: 1.4 + Math.random() * 2
+            tamanho: 8 + Math.random() * 10,
+            vy: 0.9 + Math.random() * 1
           });
         } else {
           itens.push({
             x: Math.random() * (this.canvasW - 20) + 10,
             y: -20,
             tipo: 'cometa',
-            tamanho: 11 + Math.random() * 10,
-            vy: 1.3 + Math.random() * 1.9
+            tamanho: 9 + Math.random() * 8,
+            vy: 0.85 + Math.random() * 0.95
           });
         }
       }
@@ -708,15 +708,15 @@ const Jogos = {
         return item.y < this.canvasH + 30;
       });
 
-      if (this.teclasPressionadas['ArrowLeft'] || this.teclasPressionadas['a'] || this.teclasPressionadas['A']) naveX -= 4;
-      if (this.teclasPressionadas['ArrowRight'] || this.teclasPressionadas['d'] || this.teclasPressionadas['D']) naveX += 4;
+      if (this.teclasPressionadas['ArrowLeft'] || this.teclasPressionadas['a'] || this.teclasPressionadas['A']) naveX -= 5;
+      if (this.teclasPressionadas['ArrowRight'] || this.teclasPressionadas['d'] || this.teclasPressionadas['D']) naveX += 5;
       naveX = Math.max(15, Math.min(this.canvasW - 15, naveX));
 
       for (let i = itens.length - 1; i >= 0; i--) {
         const item = itens[i];
         const dx = naveX - item.x;
         const dy = 430 - item.y;
-        if (Math.sqrt(dx * dx + dy * dy) < item.tamanho + 15) {
+        if (Math.sqrt(dx * dx + dy * dy) < item.tamanho + 10) {
           ativo = false;
           const msgs = {
             anel: 'Colidiu com os anéis de Saturno!',
@@ -764,25 +764,26 @@ const Jogos = {
     let tempoRestante = desafio.duracao;
     let ativo = true;
     let coletados = 0;
+    const metaCristais = desafio.metaCristais || 5;
 
     const loop = () => {
       if (!ativo) return;
       this.desenharBackground(ctx, '#0a1020', '#050818');
 
-      if (Math.random() < 0.04) {
-        if (Math.random() < 0.55) {
+      if (Math.random() < 0.035) {
+        if (Math.random() < 0.75) {
           itens.push({
             x: Math.random() * (this.canvasW - 16) + 8,
             y: -16,
             tipo: 'cristal',
-            vy: 1 + Math.random() * 1.5
+            vy: 0.7 + Math.random() * 0.9
           });
         } else {
           itens.push({
             x: Math.random() * (this.canvasW - 20) + 10,
             y: -20,
             tipo: 'detrito',
-            vy: 1.5 + Math.random() * 2
+            vy: 1 + Math.random() * 1.2
           });
         }
       }
@@ -810,10 +811,10 @@ const Jogos = {
         return item.y < this.canvasH + 30;
       });
 
-      if (this.teclasPressionadas['ArrowLeft'] || this.teclasPressionadas['a'] || this.teclasPressionadas['A']) naveX -= 3;
-      if (this.teclasPressionadas['ArrowRight'] || this.teclasPressionadas['d'] || this.teclasPressionadas['D']) naveX += 3;
-      if (this.teclasPressionadas['ArrowUp'] || this.teclasPressionadas['w'] || this.teclasPressionadas['W']) naveY -= 3;
-      if (this.teclasPressionadas['ArrowDown'] || this.teclasPressionadas['s'] || this.teclasPressionadas['S']) naveY += 3;
+      if (this.teclasPressionadas['ArrowLeft'] || this.teclasPressionadas['a'] || this.teclasPressionadas['A']) naveX -= 4;
+      if (this.teclasPressionadas['ArrowRight'] || this.teclasPressionadas['d'] || this.teclasPressionadas['D']) naveX += 4;
+      if (this.teclasPressionadas['ArrowUp'] || this.teclasPressionadas['w'] || this.teclasPressionadas['W']) naveY -= 4;
+      if (this.teclasPressionadas['ArrowDown'] || this.teclasPressionadas['s'] || this.teclasPressionadas['S']) naveY += 4;
       naveX = Math.max(12, Math.min(this.canvasW - 12, naveX));
       naveY = Math.max(12, Math.min(this.canvasH - 12, naveY));
 
@@ -821,7 +822,7 @@ const Jogos = {
         const item = itens[i];
         const dx = naveX - item.x;
         const dy = naveY - item.y;
-        if (Math.sqrt(dx * dx + dy * dy) < 18) {
+        if (Math.sqrt(dx * dx + dy * dy) < 22) {
           if (item.tipo === 'cristal') { coletados++; itens.splice(i, 1); }
           else { ativo = false; this.finalizarJogo(container, false, 'Detritos gelados danificaram sua nave!'); return; }
         }
@@ -847,7 +848,7 @@ const Jogos = {
 
       if (tempoRestante <= 0) {
         ativo = false;
-        this.finalizarJogo(container, coletados >= 10, coletados >= 10 ? `Coletou ${coletados} cristais!` : `Só ${coletados} cristais. Precisa de 10!`);
+        this.finalizarJogo(container, coletados >= metaCristais, coletados >= metaCristais ? `Coletou ${coletados} cristais!` : `Quase lá! ${coletados}/${metaCristais} cristais.`);
         return;
       }
       tempoRestante -= 1 / 60;
@@ -864,6 +865,7 @@ const Jogos = {
     let tempoRestante = desafio.duracao;
     let ativo = true;
     let minerados = 0;
+    const metaCristais = desafio.metaCristais || 5;
 
     const loop = () => {
       if (!ativo) return;
@@ -876,31 +878,31 @@ const Jogos = {
         ctx.fillRect(i, this.canvasH - 40, 6, 3 + Math.random() * 4);
       }
 
-      if (Math.random() < 0.04) {
-        if (Math.random() < 0.5) {
+      if (Math.random() < 0.05) {
+        if (Math.random() < 0.65) {
           cristais.push({
             x: Math.random() * (this.canvasW - 16) + 8,
             y: -16,
             tipo: 'cristal',
-            vy: 0.8 + Math.random() * 1.2
+            vy: 0.6 + Math.random() * 0.8
           });
         } else {
           cristais.push({
             x: Math.random() * (this.canvasW - 40) + 20,
             y: this.canvasH - 44,
             tipo: 'cristal',
-            vy: -(0.3 + Math.random() * 0.5)
+            vy: -(0.2 + Math.random() * 0.35)
           });
         }
       }
 
-      if (Math.random() < 0.02) {
+      if (Math.random() < 0.008) {
         cristais.push({
           x: Math.random() > 0.5 ? -20 : this.canvasW + 20,
           y: Math.random() * (this.canvasH - 80) + 40,
           tipo: 'meteoro',
-          vx: Math.random() > 0.5 ? 2 + Math.random() * 2 : -(2 + Math.random() * 2),
-          vy: 0.5 + Math.random() * 1
+          vx: Math.random() > 0.5 ? 1.2 + Math.random() : -(1.2 + Math.random()),
+          vy: 0.3 + Math.random() * 0.6
         });
       }
 
@@ -925,10 +927,10 @@ const Jogos = {
         return c.x > -30 && c.x < this.canvasW + 30 && c.y > -30 && c.y < this.canvasH + 30;
       });
 
-      if (this.teclasPressionadas['ArrowLeft'] || this.teclasPressionadas['a'] || this.teclasPressionadas['A']) naveX -= 3;
-      if (this.teclasPressionadas['ArrowRight'] || this.teclasPressionadas['d'] || this.teclasPressionadas['D']) naveX += 3;
-      if (this.teclasPressionadas['ArrowUp'] || this.teclasPressionadas['w'] || this.teclasPressionadas['W']) naveY -= 3;
-      if (this.teclasPressionadas['ArrowDown'] || this.teclasPressionadas['s'] || this.teclasPressionadas['S']) naveY += 3;
+      if (this.teclasPressionadas['ArrowLeft'] || this.teclasPressionadas['a'] || this.teclasPressionadas['A']) naveX -= 4;
+      if (this.teclasPressionadas['ArrowRight'] || this.teclasPressionadas['d'] || this.teclasPressionadas['D']) naveX += 4;
+      if (this.teclasPressionadas['ArrowUp'] || this.teclasPressionadas['w'] || this.teclasPressionadas['W']) naveY -= 4;
+      if (this.teclasPressionadas['ArrowDown'] || this.teclasPressionadas['s'] || this.teclasPressionadas['S']) naveY += 4;
       naveX = Math.max(12, Math.min(this.canvasW - 12, naveX));
       naveY = Math.max(12, Math.min(this.canvasH - 12, naveY));
 
@@ -936,7 +938,7 @@ const Jogos = {
         const c = cristais[i];
         const dx = naveX - c.x;
         const dy = naveY - c.y;
-        if (Math.sqrt(dx * dx + dy * dy) < 18) {
+        if (Math.sqrt(dx * dx + dy * dy) < 22) {
           if (c.tipo === 'cristal') { minerados++; cristais.splice(i, 1); }
           else { ativo = false; this.finalizarJogo(container, false, 'Meteoro atingiu sua nave!'); return; }
         }
@@ -962,7 +964,7 @@ const Jogos = {
 
       if (tempoRestante <= 0) {
         ativo = false;
-        this.finalizarJogo(container, minerados >= 12, minerados >= 12 ? `Minerou ${minerados} cristais em Plutão!` : `Só ${minerados} cristais. Precisa de 12!`);
+        this.finalizarJogo(container, minerados >= metaCristais, minerados >= metaCristais ? `Minerou ${minerados} cristais em Plutão!` : `Quase lá! ${minerados}/${metaCristais} cristais.`);
         return;
       }
       tempoRestante -= 1 / 60;
@@ -984,11 +986,11 @@ const Jogos = {
     const soloY = 460;
     const shipHalfW = 12;
     const shipFeet = 15;
-    const padX = 120;
-    const padW = 160;
-    const potenciaMotor = 0.38;
-    const maxVyPouso = 4;
-    const maxVxPouso = 2.5;
+    const padX = 90;
+    const padW = 220;
+    const potenciaMotor = 0.45;
+    const maxVyPouso = 5.5;
+    const maxVxPouso = 3.5;
 
     const estaSobrePad = () => {
       const esq = nave.x - shipHalfW;
@@ -1111,7 +1113,7 @@ const Jogos = {
     let spawnTimer = 0;
     const nave = { x: this.canvasW / 2, y: this.canvasH - 36 };
     const velTiro = 16;
-    const raioTiro = 6;
+    const raioTiro = 10;
 
     const disparar = (alvoX, alvoY) => {
       if (!ativo) return;
@@ -1129,14 +1131,14 @@ const Jogos = {
     const loop = () => {
       if (!ativo) return;
       spawnTimer++;
-      if (spawnTimer >= 55) {
+      if (spawnTimer >= 75) {
         spawnTimer = 0;
         meteoros.push({
           x: 30 + Math.random() * (this.canvasW - 60),
           y: -25,
-          vy: 0.55 + Math.random() * 0.45,
-          r: 16 + Math.random() * 8,
-          bom: Math.random() < 0.62
+          vy: 0.35 + Math.random() * 0.25,
+          r: 18 + Math.random() * 8,
+          bom: true
         });
       }
 
@@ -1189,10 +1191,6 @@ const Jogos = {
       meteoros = meteoros.filter(m => {
         m.y += m.vy;
         if (m.y - m.r > this.canvasH - 28) {
-          if (m.bom && ativo) {
-            ativo = false;
-            this.finalizarJogo(container, false, 'Um meteoro caiu em Marte!');
-          }
           return false;
         }
 
@@ -1243,7 +1241,7 @@ const Jogos = {
       tempoRestante -= 1 / 60;
       if (tempoRestante <= 0) {
         ativo = false;
-        this.finalizarJogo(container, false, 'Tempo esgotado!');
+        this.finalizarJogo(container, coletados >= total, coletados >= total ? `Todos os ${total} meteoros abatidos!` : `Quase lá! ${coletados}/${total} meteoros.`);
         return;
       }
 
@@ -1270,12 +1268,12 @@ const Jogos = {
         ctx.beginPath(); ctx.arc(i + 5, this.canvasH - 15, 3, 0, Math.PI * 2); ctx.fill();
       }
 
-      if (frame % Math.max(12, 35 - Math.floor(tempoRestante / 3)) === 0) {
+      if (frame % Math.max(28, 42 - Math.floor(tempoRestante / 6)) === 0) {
         obstaculos.push({
           x: 20 + Math.random() * (this.canvasW - 40), y: -30,
-          vy: 2 + Math.random() * (2 + (60 - tempoRestante) / 15),
-          vx: (Math.random() - 0.5) * 1.5,
-          tamanho: 12 + Math.random() * 15
+          vy: 1.5 + Math.random() * 1.2,
+          vx: (Math.random() - 0.5) * 1,
+          tamanho: 10 + Math.random() * 12
         });
       }
 
@@ -1290,12 +1288,12 @@ const Jogos = {
         return o.y < this.canvasH + 40;
       });
 
-      if (this.teclasPressionadas['ArrowLeft']) naveX -= 5;
-      if (this.teclasPressionadas['ArrowRight']) naveX += 5;
+      if (this.teclasPressionadas['ArrowLeft']) naveX -= 6;
+      if (this.teclasPressionadas['ArrowRight']) naveX += 6;
       naveX = Math.max(18, Math.min(this.canvasW - 18, naveX));
 
       for (const o of obstaculos) {
-        if (Math.sqrt((naveX - o.x) ** 2 + (430 - o.y) ** 2) < o.tamanho + 14) {
+        if (Math.sqrt((naveX - o.x) ** 2 + (430 - o.y) ** 2) < o.tamanho + 10) {
           ativo = false;
           this.finalizarJogo(container, false, 'Sua nave foi atingida!');
           return;
@@ -1352,13 +1350,13 @@ const Jogos = {
       ctx.fillStyle = 'rgba(139,0,0,0.3)';
       ctx.beginPath(); ctx.arc(200 + Math.sin(Date.now()/800)*10, 80, 80, 0, Math.PI * 2); ctx.fill();
 
-      if (Math.random() < 0.028) {
+      if (Math.random() < 0.014) {
         const lado = Math.random() > 0.5 ? 1 : -1;
         tempestades.push({
           x: lado === 1 ? -20 : this.canvasW + 20,
           y: minY + Math.random() * (maxY - minY),
-          vx: lado * (0.9 + Math.random() * 1.1),
-          tamanho: 18 + Math.random() * 25
+          vx: lado * (0.6 + Math.random() * 0.7),
+          tamanho: 14 + Math.random() * 14
         });
       }
 
@@ -1371,15 +1369,15 @@ const Jogos = {
         return t.x > -50 && t.x < this.canvasW + 50;
       });
 
-      if (this.teclasPressionadas['ArrowLeft'] || this.teclasPressionadas['a'] || this.teclasPressionadas['A']) naveX -= 4;
-      if (this.teclasPressionadas['ArrowRight'] || this.teclasPressionadas['d'] || this.teclasPressionadas['D']) naveX += 4;
-      if (this.teclasPressionadas['ArrowUp'] || this.teclasPressionadas['w'] || this.teclasPressionadas['W']) naveY -= 4;
-      if (this.teclasPressionadas['ArrowDown'] || this.teclasPressionadas['s'] || this.teclasPressionadas['S']) naveY += 4;
+      if (this.teclasPressionadas['ArrowLeft'] || this.teclasPressionadas['a'] || this.teclasPressionadas['A']) naveX -= 5;
+      if (this.teclasPressionadas['ArrowRight'] || this.teclasPressionadas['d'] || this.teclasPressionadas['D']) naveX += 5;
+      if (this.teclasPressionadas['ArrowUp'] || this.teclasPressionadas['w'] || this.teclasPressionadas['W']) naveY -= 5;
+      if (this.teclasPressionadas['ArrowDown'] || this.teclasPressionadas['s'] || this.teclasPressionadas['S']) naveY += 5;
       naveX = Math.max(15, Math.min(this.canvasW - 15, naveX));
       naveY = Math.max(minY, Math.min(maxY, naveY));
 
       for (const t of tempestades) {
-        if (Math.sqrt((naveX - t.x) ** 2 + (naveY - t.y) ** 2) < t.tamanho + 15) {
+        if (Math.sqrt((naveX - t.x) ** 2 + (naveY - t.y) ** 2) < t.tamanho + 10) {
           ativo = false;
           this.finalizarJogo(container, false, 'Atingido por tempestade!');
           return;
@@ -1415,14 +1413,14 @@ const Jogos = {
     let naveX = 200, naveY = 250, tempoRestante = desafio.duracao;
     let ventos = [], ativo = true;
     const tempoTotal = desafio.duracao;
-    const margem = 20;
+    const margem = 14;
 
     const loop = () => {
       if (!ativo) return;
       this.desenharBackground(ctx, '#0a0a2e', '#050520');
 
       const tempoDecorrido = tempoTotal - tempoRestante;
-      const taxaSpawn = tempoDecorrido < 4 ? 0 : (tempoDecorrido < 10 ? 0.018 : 0.028);
+      const taxaSpawn = tempoDecorrido < 3 ? 0 : (tempoDecorrido < 8 ? 0.01 : 0.015);
 
       ctx.strokeStyle = 'rgba(255, 80, 80, 0.25)';
       ctx.lineWidth = 2;
@@ -1458,8 +1456,8 @@ const Jogos = {
         ctx.stroke();
         const dx = naveX - v.x, dy = naveY - v.y;
         if (Math.sqrt(dx * dx + dy * dy) < 32) {
-          naveX += v.vx * 1.2;
-          naveY += v.vy * 1.2;
+          naveX += v.vx * 0.7;
+          naveY += v.vy * 0.7;
         }
         return v.vida > 0;
       });
@@ -1468,10 +1466,10 @@ const Jogos = {
       const dir = this.teclasPressionadas['ArrowRight'] || this.teclasPressionadas['d'] || this.teclasPressionadas['D'];
       const cima = this.teclasPressionadas['ArrowUp'] || this.teclasPressionadas['w'] || this.teclasPressionadas['W'];
       const baixo = this.teclasPressionadas['ArrowDown'] || this.teclasPressionadas['s'] || this.teclasPressionadas['S'];
-      if (cima) naveY -= 4.5;
-      if (baixo) naveY += 4.5;
-      if (esq) naveX -= 4.5;
-      if (dir) naveX += 4.5;
+      if (cima) naveY -= 5.5;
+      if (baixo) naveY += 5.5;
+      if (esq) naveX -= 5.5;
+      if (dir) naveX += 5.5;
 
       if (naveX < margem || naveX > this.canvasW - margem || naveY < margem || naveY > this.canvasH - margem) {
         ativo = false;
@@ -1491,7 +1489,7 @@ const Jogos = {
       ctx.fillStyle = '#8899bb';
       ctx.font = '11px monospace';
       ctx.textAlign = 'center';
-      if (tempoDecorrido < 4) {
+      if (tempoDecorrido < 3) {
         ctx.fillStyle = '#aad4ff';
         ctx.fillText('Prepare-se! Os ventos de Netuno vão começar em instantes…', this.canvasW / 2, this.canvasH - 8);
       } else {

@@ -38,9 +38,9 @@ const planetas = [
 
     desafio: {
       nome: 'Erupções Solares',
-      descricao: 'Desvie das erupções solares! Use WASD para mover a nave.',
+      descricao: 'Desvie das erupções solares! Use WASD ou os botões para mover a nave.',
       tipo: 'solarFlare',
-      duracao: 20
+      duracao: 10
     }
   },
   {
@@ -66,9 +66,9 @@ const planetas = [
     ],
     desafio: {
       nome: 'Corrida de Mercúrio',
-      descricao: 'Mercúrio é o mais rápido! Desvie dos obstáculos em alta velocidade. Use ← → para trocar de faixa.',
+      descricao: 'Mercúrio é o mais rápido! Desvie dos obstáculos. Use ← → para trocar de faixa.',
       tipo: 'mercuryDash',
-      duracao: 25
+      duracao: 12
     }
   },
   {
@@ -94,9 +94,10 @@ const planetas = [
     ],
     desafio: {
       nome: 'Fuga de Vênus',
-      descricao: 'Escale pelas plataformas escaldantes de Vênus! Use WASD para pular entre plataformas.',
+      descricao: 'Escale pelas plataformas de Vênus! Toque nas plataformas douradas. Evite as vermelhas.',
       tipo: 'venusEscape',
-      duracao: 30
+      duracao: 15,
+      metaPontos: 8
     }
   },
   {
@@ -122,9 +123,9 @@ const planetas = [
     ],
     desafio: {
       nome: 'Desvio de Meteoros',
-      descricao: 'Desvie dos meteoros e cometas por 30 segundos! Use as setas ← → para mover a nave.',
+      descricao: 'Desvie dos meteoros! Use as setas ← → para mover a nave.',
       tipo: 'desvioMeteoros',
-      duracao: 30
+      duracao: 12
     }
   },
   {
@@ -150,10 +151,10 @@ const planetas = [
     ],
     desafio: {
       nome: 'Pouso Lunar',
-      descricao: 'Freie com ↑ e alinhe a nave na área verde. Velocidade vertical abaixo de 4 para pousar com sucesso!',
+      descricao: 'Freie com ↑ e alinhe a nave na área verde para pousar na Lua!',
       tipo: 'pousoLunar',
-      gravidade: 0.08,
-      combustivel: 120
+      gravidade: 0.05,
+      combustivel: 160
     }
   },
   {
@@ -179,10 +180,10 @@ const planetas = [
     ],
     desafio: {
       nome: 'Caça aos Meteoros',
-      descricao: 'Dispare nos meteoros ☄️ antes que caiam em Marte! Só contam os alvos abatidos. Você tem 30 segundos.',
+      descricao: 'Toque nos meteoros ☄️ para abatê-los em Marte! Abata todos os alvos.',
       tipo: 'cliqueMeteoros',
-      duracao: 30,
-      totalMeteoros: 15
+      duracao: 25,
+      totalMeteoros: 6
     }
   },
   {
@@ -208,9 +209,9 @@ const planetas = [
     ],
     desafio: {
       nome: 'Tempestade em Júpiter',
-      descricao: 'Desvie sua nave das tempestades na Grande Mancha Vermelha! Use ← → para os lados e ↑ ↓ para frente e trás.',
+      descricao: 'Desvie das tempestades na Grande Mancha Vermelha! Use as setas para mover a nave.',
       tipo: 'desvioTempestade',
-      duracao: 15
+      duracao: 8
     }
   },
   {
@@ -236,9 +237,9 @@ const planetas = [
     ],
     desafio: {
       nome: 'Anéis de Saturno',
-      descricao: 'Desvie dos anéis, meteoros e cometas amarelos de Saturno! Use ← → para mover. Sobreviva 30 segundos.',
+      descricao: 'Desvie dos anéis e meteoros de Saturno! Use ← → para mover a nave.',
       tipo: 'ringCollector',
-      duracao: 30
+      duracao: 12
     }
   },
   {
@@ -264,9 +265,10 @@ const planetas = [
     ],
     desafio: {
       nome: 'Gelo de Urano',
-      descricao: 'Colete cristais de gelo desviando dos detritos! Use WASD para mover. Você tem 1 minuto.',
+      descricao: 'Colete cristais de gelo ❄️ e evite os detritos! Use WASD ou os botões para mover.',
       tipo: 'uranoIce',
-      duracao: 60
+      duracao: 25,
+      metaCristais: 5
     }
   },
   {
@@ -292,9 +294,10 @@ const planetas = [
     ],
     desafio: {
       nome: 'Minerador de Plutão',
-      descricao: 'Mineire cristais de gelo em Plutão! Use WASD para se mover e colete os cristais.',
+      descricao: 'Colete cristais 💎 em Plutão! Evite os meteoros vermelhos.',
       tipo: 'plutoMiner',
-      duracao: 25
+      duracao: 18,
+      metaCristais: 5
     }
   },
   {
@@ -320,9 +323,9 @@ const planetas = [
     ],
     desafio: {
       nome: 'Fuja dos Ventos de Netuno',
-      descricao: 'Netuno tem ventos muito fortes! As rajadas 💨 empurram sua nave. Use WASD ou setas para se manter no centro da tela. Sobreviva 30 segundos.',
+      descricao: 'Os ventos 💨 empurram sua nave! Fique dentro da zona segura no centro da tela.',
       tipo: 'fugaVentos',
-      duracao: 30
+      duracao: 12
     }
   },
   {
