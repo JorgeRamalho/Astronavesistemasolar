@@ -348,12 +348,48 @@ A sessão concentrou-se em:
 
 ---
 
+### 28. Compartilhar Jogo — remoção do QR e do acesso dedicado
+
+**Pedido:** Na tela Compartilhar Jogo, retirar o QR Code do acesso dedicado e, em seguida, excluir por completo o acesso dedicado (menu e tela).
+
+**Alterações:**
+- `js/main.js` — removidos o card/seção de acesso dedicado, o link do menu e a renderização do QR dedicado.
+- `js/rede-teste.js` — removidas `obterLinkDedicado()`, `obterLinkJogoDedicado()` e `ACESSO_DEDICADO_PATH`.
+- `css/style.css` — removidos estilos `.rede-link-box-dedicado`, `.link-site-dedicado` e correlatos.
+- `acesso.html` — **removido**.
+
+**Commit relacionado em `main`:** `b05d2ae`
+
+---
+
+### 29. Compartilhar Jogo — remover "Abrir site online", teste Wi‑Fi e "Este dispositivo agora"
+
+**Pedido:** Excluir o botão "Abrir site online", a seção de teste na rede local (Wi‑Fi) e o painel "Este dispositivo agora".
+
+**Alterações:**
+- `js/main.js` — `criarTelaTesteRede()` reduzida ao bloco "Site online" (link, copiar e QR); removidas `copiarLinkRede()`/`carregarLinkRede()` da tela e o texto do card do menu ajustado para "Site online".
+
+**Commit relacionado em `main`:** `b05d2ae`
+
+---
+
+### 30. Nível do jogo — simplificar todas as fases para idade 4+
+
+**Pedido:** Adaptar o jogo para crianças a partir dos 4 anos, deixando a jogabilidade mais simples e fácil em todas as fases dos planetas, mantendo os temas de cada fase.
+
+**Alterações:**
+- `js/data.js` — durações menores, novas metas (`metaPontos`, `metaCristais`, `totalMeteoros` reduzido), gravidade/combustível da Lua e descrições simplificadas.
+- `js/games.js` — menos spawns, velocidades menores, nave mais ágil, colisões mais tolerantes, metas de vitória menores; Vênus sem derrota instantânea no perigo, Marte sem derrota ao deixar passar meteoro.
+
+**Commit relacionado em `main`:** `4ac7df9`
+
+---
+
 ## Arquivos criados na sessão
 
 | Arquivo | Função |
 |---------|--------|
 | `js/tripulantes.js` | Diálogos da tripulação |
-| `acesso.html` | Portal de acesso dedicado |
 | `docs/HISTORICO-REGISTROS.md` | Este documento |
 | `docs/BRANCHES.md` | Estratégia de branches |
 | `README.md` | Apresentação do repositório |
@@ -363,6 +399,7 @@ A sessão concentrou-se em:
 | Arquivo | Motivo |
 |---------|--------|
 | `js/narrator.js` | Substituído pela tripulação Alexis/Caroll (`7f0dde2`) |
+| `acesso.html` | Acesso dedicado descontinuado (`b05d2ae`) |
 
 ---
 
@@ -379,6 +416,13 @@ A sessão concentrou-se em:
 |------|----------|
 | `8a7a41b` | `refactor(ui): integra galeria ao modo Sistema Solar` |
 | `c13cfc5` | `feat(menu): adiciona selo Novo Game em Viagem Espacial` |
+
+## Commits em `main` (compartilhamento e nível do jogo)
+
+| Hash | Mensagem |
+|------|----------|
+| `b05d2ae` | `refactor(compartilhar): simplifica tela Compartilhar Jogo` |
+| `4ac7df9` | `feat(jogo): simplifica nivel das fases para criancas a partir de 4 anos` |
 
 ---
 
@@ -397,5 +441,4 @@ A sessão concentrou-se em:
 ## Referências
 
 - Site: https://jorgeramalho.github.io/Astronavesistemasolar/
-- Acesso dedicado: https://jorgeramalho.github.io/Astronavesistemasolar/acesso.html
 - Remote: `https://github.com/JorgeRamalho/Astronavesistemasolar.git`
