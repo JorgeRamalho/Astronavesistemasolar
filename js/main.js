@@ -207,13 +207,10 @@ document.addEventListener('DOMContentLoaded', () => {
               <div class="modo-card-content">
                 <h3>Compartilhar Jogo</h3>
                 <p>Link online e QR Code — acesse de qualquer lugar</p>
-                <span class="modo-card-info">Site + rede local</span>
+                <span class="modo-card-info">Site online</span>
               </div>
             </div>
           </div>
-          <a class="link-site-online link-site-dedicado" href="${RedeTeste.obterLinkDedicado()}" rel="noopener noreferrer">
-            🔐 Acesso dedicado: ${RedeTeste.obterLinkDedicado().replace(/^https?:\/\//, '')}
-          </a>
           <a class="link-site-online link-site-online-alt" href="${RedeTeste.obterLinkOnline()}" rel="noopener noreferrer">
             🌐 Site online: jorgeramalho.github.io/Astronavesistemasolar
           </a>
@@ -356,10 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
     criarTelaTesteRede() {
       RedeTeste.pararPoll();
       const main = document.getElementById('main-container');
-      const info = RedeTeste.obterInfoViewport();
-      const emArquivo = RedeTeste.estaEmArquivoLocal();
       const linkOnline = RedeTeste.obterLinkOnline();
-      const linkDedicado = RedeTeste.obterLinkDedicado();
 
       main.innerHTML = `
         <div class="tela-teste-rede">
@@ -369,21 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="rede-header">
             <span class="rede-header-icon">🌐</span>
             <h2>Compartilhar Jogo</h2>
-            <p>Acesse de qualquer lugar ou teste na rede local</p>
-          </div>
-
-          <div class="rede-link-box rede-link-box-dedicado">
-            <div class="rede-badge-dedicado">ACESSO DEDICADO</div>
-            <label class="rede-label">Link reservado — porta de entrada exclusiva</label>
-            <div class="rede-link-linha">
-              <input type="text" class="rede-link-input rede-link-input-dedicado" id="rede-link-dedicado" readonly value="${linkDedicado}">
-              <button type="button" class="btn-rede-copiar btn-rede-copiar-dedicado" id="btn-copiar-dedicado">Copiar</button>
-            </div>
-            <a class="btn-abrir-online btn-abrir-dedicado" href="${linkDedicado}" rel="noopener noreferrer">Abrir acesso dedicado ↗</a>
-            <div class="rede-qr-wrap">
-              <div class="rede-qr-placeholder" id="rede-qr-dedicado"></div>
-            </div>
-            <p class="rede-link-dica" id="rede-status-dedicado">Compartilhe este link reservado para convidados entrarem direto na missão.</p>
+            <p>Acesse de qualquer lugar</p>
           </div>
 
           <div class="rede-link-box rede-link-box-online">
@@ -393,57 +373,16 @@ document.addEventListener('DOMContentLoaded', () => {
               <input type="text" class="rede-link-input rede-link-input-online" id="rede-link-online" readonly value="${linkOnline}">
               <button type="button" class="btn-rede-copiar btn-rede-copiar-online" id="btn-copiar-online">Copiar</button>
             </div>
-            <a class="btn-abrir-online" href="${linkOnline}" target="_blank" rel="noopener">Abrir site online ↗</a>
             <div class="rede-qr-wrap">
               <div class="rede-qr-placeholder" id="rede-qr-online"></div>
             </div>
             <p class="rede-link-dica" id="rede-status-online">Escaneie o QR Code ou envie o link para qualquer pessoa.</p>
-          </div>
-
-          <details class="rede-local-detalhes"${emArquivo ? ' open' : ''}>
-            <summary>Teste na rede local (Wi‑Fi)</summary>
-            ${emArquivo ? `
-              <div class="rede-alerta rede-alerta-aviso">
-                <strong>Servidor local</strong>
-                <p>Execute <code>start-teste.bat</code> para gerar link na mesma Wi‑Fi.</p>
-              </div>
-            ` : ''}
-            <div class="rede-link-box" id="rede-link-box">
-              <label class="rede-label">Link na mesma Wi‑Fi</label>
-              <div class="rede-link-linha">
-                <input type="text" class="rede-link-input" id="rede-link-input" readonly placeholder="Aguardando servidor…">
-                <button type="button" class="btn-rede-copiar" id="btn-rede-copiar">Copiar</button>
-              </div>
-              <p class="rede-link-dica" id="rede-link-status">Detectando link na rede…</p>
-              <div class="rede-qr-wrap">
-                <div class="rede-qr-placeholder" id="rede-qr-placeholder">
-                  <span class="rede-qr-loading">⏳ Gerando QR Code…</span>
-                </div>
-              </div>
-              <div class="rede-links-extra" id="rede-links-extra"></div>
-            </div>
-          </details>
-
-          <div class="rede-viewport-box">
-            <h3>Este dispositivo agora</h3>
-            <div class="rede-viewport-grid">
-              <div class="rede-stat"><span>Breakpoint</span><strong style="color:${info.corBreakpoint}">${info.breakpoint}</strong></div>
-              <div class="rede-stat"><span>Resolução</span><strong>${info.largura} × ${info.altura}px</strong></div>
-              <div class="rede-stat"><span>Orientação</span><strong>${info.orientacao}</strong></div>
-              <div class="rede-stat"><span>DPR</span><strong>${info.dpr}</strong></div>
-            </div>
-            <button type="button" class="btn-rede-overlay" id="btn-rede-overlay">
-              ${RedeTeste.overlayAtivo ? 'Desativar' : 'Ativar'} overlay responsivo
-            </button>
           </div>
         </div>
         <div class="estrelas-bg"></div>
       `;
 
       this.criarEstrelas();
-
-      const qrDedicado = document.getElementById('rede-qr-dedicado');
-      if (qrDedicado) RedeTeste.renderizarQrCode(qrDedicado, linkDedicado);
 
       const qrOnline = document.getElementById('rede-qr-online');
       if (qrOnline) RedeTeste.renderizarQrCode(qrOnline, linkOnline);
@@ -453,74 +392,11 @@ document.addEventListener('DOMContentLoaded', () => {
         this.transicao(() => this.criarTelaInicial());
       });
 
-      document.getElementById('btn-rede-overlay')?.addEventListener('click', () => {
-        RedeTeste.alternarOverlay();
-        const btn = document.getElementById('btn-rede-overlay');
-        if (btn) btn.textContent = `${RedeTeste.overlayAtivo ? 'Desativar' : 'Ativar'} overlay responsivo`;
-      });
-
-      document.getElementById('btn-copiar-dedicado')?.addEventListener('click', async () => {
-        const ok = await RedeTeste.copiarTexto(linkDedicado);
-        const st = document.getElementById('rede-status-dedicado');
-        if (st) st.textContent = ok ? '✅ Link dedicado copiado!' : 'Copie manualmente o link acima.';
-      });
-
       document.getElementById('btn-copiar-online')?.addEventListener('click', async () => {
         const ok = await RedeTeste.copiarTexto(linkOnline);
         const st = document.getElementById('rede-status-online');
         if (st) st.textContent = ok ? '✅ Link online copiado!' : 'Copie manualmente o link acima.';
       });
-
-      document.getElementById('btn-rede-copiar')?.addEventListener('click', () => this.copiarLinkRede());
-
-      this.carregarLinkRede();
-      if (!document.getElementById('rede-link-input')?.value) {
-        RedeTeste._pollTimer = setInterval(() => this.carregarLinkRede(), 2500);
-      }
-    },
-
-    async copiarLinkRede() {
-      const input = document.getElementById('rede-link-input');
-      const status = document.getElementById('rede-link-status');
-      if (!input?.value) return;
-      const ok = await RedeTeste.copiarTexto(input.value);
-      if (status) {
-        status.textContent = ok ? '✅ Link copiado! Cole no navegador do celular.' : 'Copie manualmente o link acima.';
-        status.style.color = ok ? '#6fcf6f' : '#ff8888';
-      }
-    },
-
-    async carregarLinkRede() {
-      const input = document.getElementById('rede-link-input');
-      const status = document.getElementById('rede-link-status');
-      const qrBox = document.getElementById('rede-qr-placeholder');
-      const extra = document.getElementById('rede-links-extra');
-      if (!input) return;
-
-      const resultado = await RedeTeste.gerarLinksCompartilhaveis();
-
-      if (resultado.primary) {
-        input.value = resultado.primary;
-        if (qrBox) {
-          const ok = RedeTeste.renderizarQrCode(qrBox, resultado.primary);
-          if (!ok) qrBox.innerHTML = '<span class="rede-qr-erro">QR indisponível</span>';
-        }
-        if (status) {
-          status.textContent = '📱 Escaneie o QR Code ou toque em Copiar e abra no celular.';
-          status.style.color = '#8899bb';
-        }
-        if (extra && resultado.links.length > 1) {
-          extra.innerHTML = `
-            <p class="rede-label" style="margin-top:16px">Outros endereços:</p>
-            ${resultado.links.filter(u => u !== resultado.primary).map(u =>
-              `<a class="rede-link-alt" href="${u}" target="_blank" rel="noopener">${u}</a>`
-            ).join('')}
-          `;
-        }
-        RedeTeste.pararPoll();
-      } else if (status && !input.value) {
-        status.textContent = '⏳ Execute start-teste.bat e aguarde…';
-      }
     },
 
     criarListaRota() {

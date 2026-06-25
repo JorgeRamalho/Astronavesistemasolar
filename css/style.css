@@ -3332,57 +3332,10 @@ body {
   color: #8fef8f;
 }
 
-.link-site-dedicado {
-  color: #FDB813;
-  background: rgba(253, 184, 19, 0.1);
-  border-color: rgba(253, 184, 19, 0.4);
-  margin-top: 20px;
-  position: relative;
-  z-index: 3;
-}
-
-.link-site-dedicado:hover {
-  background: rgba(253, 184, 19, 0.18);
-  color: #ffc94d;
-}
-
 .link-site-online-alt {
   margin-top: 8px;
   font-size: 12px;
   opacity: 0.85;
-}
-
-.rede-link-box-dedicado {
-  border-color: rgba(253, 184, 19, 0.5) !important;
-  box-shadow: 0 0 30px rgba(253, 184, 19, 0.15);
-  margin-bottom: 16px;
-}
-
-.rede-badge-dedicado {
-  display: inline-block;
-  padding: 4px 12px;
-  margin-bottom: 12px;
-  background: rgba(253, 184, 19, 0.2);
-  color: #FDB813;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  border-radius: 20px;
-}
-
-.rede-link-input-dedicado {
-  border-color: rgba(253, 184, 19, 0.45) !important;
-  color: #FDB813 !important;
-}
-
-.btn-rede-copiar-dedicado {
-  background: rgba(253, 184, 19, 0.2) !important;
-  color: #FDB813 !important;
-}
-
-.btn-abrir-dedicado {
-  background: linear-gradient(135deg, #FDB813, #FF6B00) !important;
-  color: #0a0a1a !important;
 }
 
 .rede-link-box-online {

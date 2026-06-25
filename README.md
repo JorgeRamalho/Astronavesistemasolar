@@ -7,7 +7,6 @@ Jogo educativo em HTML, CSS e JavaScript sobre o Sistema Solar. O jogador percor
 | Tipo | URL |
 |------|-----|
 | Jogo | https://jorgeramalho.github.io/Astronavesistemasolar/ |
-| Acesso dedicado | https://jorgeramalho.github.io/Astronavesistemasolar/acesso.html |
 | Teste em rede local (QR) | `/rede.html` no servidor local |
 
 ## Como executar localmente
@@ -22,7 +21,6 @@ Ou execute `start-teste.bat` no Windows. O servidor sobe na porta **8765** e exi
 
 ```
 index.html          Entrada principal do jogo
-acesso.html         Portal de acesso dedicado (web)
 rede.html           Link e QR Code para teste em outros dispositivos
 css/style.css       Estilos e responsividade mobile
 js/main.js          Telas, rotas, exploração e integração geral

@@ -5,7 +5,6 @@ const RedeTeste = {
   _pollTimer: null,
   PORTA_PADRAO: 8765,
   SITE_ONLINE_URL: 'https://jorgeramalho.github.io/Astronavesistemasolar/',
-  ACESSO_DEDICADO_PATH: 'acesso.html',
 
   init() {
     if (sessionStorage.getItem('redeTesteOverlay') === '1') {
@@ -65,16 +64,8 @@ const RedeTeste = {
     return this.obterBaseOnline();
   },
 
-  obterLinkDedicado() {
-    return `${this.obterBasePath()}${this.ACESSO_DEDICADO_PATH}`;
-  },
-
   obterLinkJogo() {
     return `${this.obterBasePath()}index.html`;
-  },
-
-  obterLinkJogoDedicado() {
-    return `${this.obterBasePath()}index.html?acesso=dedicado`;
   },
 
   estaNoSiteOnline() {
